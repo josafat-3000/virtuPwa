@@ -1,0 +1,9 @@
+{
+  "semi": true,                  // Agrega punto y coma al final de las declaraciones
+  "singleQuote": true,           // Usa comillas simples en lugar de comillas dobles
+  "tabWidth": 2,                 // Define el ancho de las tabulaciones
+  "useTabs": false,              // Usa espacios en lugar de tabulaciones
+  "trailingComma": "es5",        // Agrega comas finales donde es posible
+  "bracketSpacing": true,        // Espaciado entre llaves
+  "jsxBracketSameLine": false    // Coloca el '>' en la misma línea que el último elemento en JSX
+}

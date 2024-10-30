@@ -1,37 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import appLogo from '/favicon.svg'
-import PWABadge from './PWABadge.jsx'
-import './App.css'
-
-function App() {
-  const [count, setCount] = useState(0)
-
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginForm from './pages/Auth/Login/Login'; // Asegúrate de que la ruta sea correcta
+// import './App.css'; // Archivo de estilos globales, si tienes uno
+import Dashboard from './pages/Dashboard/Dashboard';
+import ProtectedRoute from "./components/Protected";
+import MainLayout from './components/Layout/MainLayout/MainLayout';
+import Registros from './pages/Registros/Registros';
+import AccionsPage from './pages/Acciones/Acciones';
+import ProfilePage from './pages/Profile/Profile';
+import Configuracion from './pages/Configuracion/Configuracion';
+import Forgot from './pages/Auth/ForgotPassword/Forgot';
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={appLogo} className="logo" alt="virtuPWA logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>virtuPWA</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <PWABadge />
-    </>
-  )
-}
+    <Router>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <ProtectedRoute redirectAuthenticatedTo="/">
+              <LoginForm />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/forgot"
+          element={
+            <ProtectedRoute redirectAuthenticatedTo="/">
+              <Forgot />
+            </ProtectedRoute>
+          }
+        ></Route>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard></Dashboard>} />
+          <Route path='/registros' element={<Registros></Registros>} />
+          <Route path='/acciones' element={<AccionsPage />} />
+          <Route path='/perfil' element={<ProfilePage></ProfilePage>} />
+          <Route path='/configuracion' element={<Configuracion></Configuracion>} />
 
-export default App
+        </Route>
+      </Routes>
+    </Router>
+
+  );
+};
+
+export default App;

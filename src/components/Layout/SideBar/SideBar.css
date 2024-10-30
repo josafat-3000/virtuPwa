@@ -1,0 +1,24 @@
+.logo {
+    display: flex;
+    align-items: center;
+    /* Centra verticalmente los elementos dentro del div */
+    justify-content: space-around;
+    /* Distribuye los elementos con espacio entre ellos */
+    flex-grow: 1;
+    /* Hace que el div ocupe el espacio disponible */
+    margin: auto;
+    padding: 15px 0;
+  }
+  
+  .logo.collapsed {
+    justify-content: center;
+    /* Alinea a la izquierda cuando colapsado */
+  }
+  
+  .avatar{
+    display: block !important;
+  }
+
+
+  
+  
