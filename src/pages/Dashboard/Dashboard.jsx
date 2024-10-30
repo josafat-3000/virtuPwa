@@ -355,7 +355,11 @@ const Dashboard = () => {
             label="Fecha de la Visita"
             rules={[{ required: true, message: 'Por favor, selecciona la fecha de la visita' }]}
           >
-            <DatePicker showTime />
+            <DatePicker showTime style={{width:'100%'}}  placement="bottom" popupStyle={{
+                    
+                    maxWidth: '90%', // Asegúrate de que no se desborde de la pantalla
+                    zIndex: 1000, // Asegúrate de que esté por encima de otros elementos
+                }}/>
           </Form.Item>
 
         </Form>
