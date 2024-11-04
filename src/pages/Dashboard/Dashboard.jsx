@@ -17,7 +17,10 @@ import { Card, Table, Empty, Statistic, Row, Col, Typography } from 'antd';
 import { fetchVisitStats } from '../../store/visitSlice.js'
 import './Dashboard.css';
 import { UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
-
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import TextField from '@mui/material/TextField';
+import dayjs from 'dayjs';
 const { Title } = Typography;
 
 const columns = [
@@ -73,6 +76,7 @@ const Dashboard = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const dispatch = useDispatch();
   const qrRef = useRef();
+  const [selectedDate, setSelectedDate] = useState(dayjs());
  
   useEffect(() => {
     dispatch(fetchVisitStats()); // Obtén los datos al montar el componente
@@ -355,11 +359,14 @@ const Dashboard = () => {
             label="Fecha de la Visita"
             rules={[{ required: true, message: 'Por favor, selecciona la fecha de la visita' }]}
           >
-            <DatePicker showTime style={{width:'100%'}}  placement="bottom" popupStyle={{
-                    
-                    maxWidth: '90%', // Asegúrate de que no se desborde de la pantalla
-                    zIndex: 1000, // Asegúrate de que esté por encima de otros elementos
-                }}/>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+           <DateTimePicker
+        label="Fecha y hora"
+        value={selectedDate}
+        onChange={setSelectedDate}
+        renderInput={(params) => <TextField {...params} />}
+      />
+      </LocalizationProvider>
           </Form.Item>
 
         </Form>

@@ -1,8 +1,12 @@
 import React, { useState, useRef,useEffect } from 'react';
-import { QRCode, Card, Button, Row, Col, Modal, Form, Input, DatePicker, Checkbox, message } from 'antd';
+import { QRCode, Card, Button, Row, Col, Modal, Form, Input, Checkbox, message } from 'antd';
 import Validate from './Validate/ValidateModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { startRecording, startScan, stopScan, updateVisitStatus } from '../../store/scanSlice';
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import TextField from '@mui/material/TextField';
+import dayjs from 'dayjs';
 
 import {
   PlusOutlined,
@@ -19,6 +23,7 @@ const ActionsPage = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const dispatch = useDispatch();
   const qrRef = useRef();
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   async function handleShare() {
     try {
@@ -288,13 +293,15 @@ const ActionsPage = () => {
             label="Fecha de la Visita"
             rules={[{ required: true, message: 'Por favor, selecciona la fecha de la visita' }]}
           >
-            <DatePicker showTime style={{width:'100%'}}  placement="bottom" popupStyle={{
-                    
-                    maxWidth: '90%', // Asegúrate de que no se desborde de la pantalla
-                    zIndex: 1000, // Asegúrate de que esté por encima de otros elementos
-                }}/>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+           <DateTimePicker
+        label="Fecha y hora"
+        value={selectedDate}
+        onChange={setSelectedDate}
+        renderInput={(params) => <TextField {...params} />}
+      />
+      </LocalizationProvider>
           </Form.Item>
-
         </Form>
       </Modal>
       {visitId && (
