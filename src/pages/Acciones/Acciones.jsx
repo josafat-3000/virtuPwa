@@ -289,19 +289,24 @@ const ActionsPage = () => {
           )}
 
           <Form.Item
-            name="visit_date"
-            label="Fecha de la Visita"
-            rules={[{ required: true, message: 'Por favor, selecciona la fecha de la visita' }]}
-          >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-           <DateTimePicker
-        label="Fecha y hora"
-        value={selectedDate}
-        onChange={setSelectedDate}
-        renderInput={(params) => <TextField {...params} />}
-      />
-      </LocalizationProvider>
-          </Form.Item>
+        name="visit_date"
+        label="Fecha de la Visita"
+        rules={[{ required: true, message: 'Por favor, selecciona la fecha de la visita' }]}
+        // Usamos `getValueFromEvent` para que Ant Design maneje el valor seleccionado
+        getValueFromEvent={(date) => date} 
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateTimePicker
+            label="Fecha y hora"
+            value={selectedDate}
+            onChange={(newValue) => {
+              setSelectedDate(newValue); // Actualiza el estado local
+              form.setFieldsValue({ visit_date: newValue }); // Actualiza el valor en el formulario de Ant Design
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </LocalizationProvider>
+      </Form.Item>
         </Form>
       </Modal>
       {visitId && (
