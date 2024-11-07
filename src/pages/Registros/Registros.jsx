@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
-import { Card, Table, Empty, Row, Col, Typography, Button } from "antd";
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { Card, Table, Empty, Typography, Button, Input, Space, DatePicker } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { useSelector, useDispatch } from "react-redux";
 import * as XLSX from "xlsx";
 import { fetchAllVisits } from "../../store/allVisitSlice";
 
 const { Title } = Typography;
+const { RangePicker } = DatePicker;
+
 
 const columns = [
     {
@@ -146,8 +149,165 @@ function Registros() {
         XLSX.writeFile(workbook, "historial_visitas.xlsx");
     };
 
+     const getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    placeholder={`Buscar ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => confirm()}
+                    style={{ marginBottom: 8, display: "block" }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => confirm()}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Buscar
+                    </Button>
+                    <Button onClick={clearFilters} size="small" style={{ width: 90 }}>
+                        Resetear
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
+        onFilter: (value, record) =>
+            record[dataIndex]
+                ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+                : "",
+    });
+
+    // Configuración de filtro de rango de fecha
+    const getColumnDateRangeProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <RangePicker
+                    onChange={(dates) => setSelectedKeys(dates ? [dates] : [])}
+                    style={{ marginBottom: 8, display: "block" }}
+                />
+                <Space>
+                    <Button type="primary" onClick={() => confirm()} size="small" style={{ width: 90 }}>
+                        Buscar
+                    </Button>
+                    <Button onClick={clearFilters} size="small" style={{ width: 90 }}>
+                        Resetear
+                    </Button>
+                </Space>
+            </div>
+        ),
+        onFilter: (value, record) => {
+            const [start, end] = value || [];
+            const recordDate = new Date(record[dataIndex]);
+            return start && end ? recordDate >= start && recordDate <= end : true;
+        },
+    });
+
+    const columns = [
+        {
+            title: "ID",
+            dataIndex: "id",
+            key: "id",
+        },
+        {
+            title: "Nombre del Visitante",
+            dataIndex: "visitor_name",
+            key: "visitor_name",
+            ...getColumnSearchProps("visitor_name"),
+        },
+        {
+            title: "Empresa del Visitante",
+            dataIndex: "visitor_company",
+            key: "visitor_company",
+            ...getColumnSearchProps("visitor_company"),
+        },
+        {
+            title: "Razón de la Visita",
+            dataIndex: "visit_reason",
+            key: "visit_reason",
+            ...getColumnSearchProps("visit_reason"),
+        },
+        {
+            title: "Material de la Visita",
+            dataIndex: "visit_material",
+            key: "visit_material",
+            ...getColumnSearchProps("visit_material"),
+        },
+        {
+            title: "Vehículo",
+            dataIndex: "vehicle",
+            key: "vehicle",
+            render: (vehicle) => (vehicle ? "Sí" : "No"),
+        },
+        {
+            title: "Modelo del Vehículo",
+            dataIndex: "vehicle_model",
+            key: "vehicle_model",
+            render: (text) => (text ? text : "No disponible"),
+        },
+        {
+            title: "Placa del Vehículo",
+            dataIndex: "vehicle_plate",
+            key: "vehicle_plate",
+            render: (text) => (text ? text : "No disponible"),
+        },
+        {
+            title: "Fecha y Hora de la Visita",
+            dataIndex: "visit_date",
+            key: "visit_date",
+            render: (text) => new Date(text).toLocaleString(),
+            ...getColumnDateRangeProps("visit_date"),
+        },
+        {
+            title: "Usuario ID",
+            dataIndex: "user_id",
+            key: "user_id",
+        },
+        {
+            title: "Estado",
+            dataIndex: "status",
+            key: "status",
+            filters: [
+                { text: "Pendiente", value: "pending" },
+                { text: "En Progreso", value: "in_progress" },
+                { text: "Completado", value: "completed" },
+            ],
+            onFilter: (value, record) => record.status === value,
+            render: (status) => {
+                switch (status) {
+                    case "pending":
+                        return <span style={{ color: "orange" }}>Pendiente</span>;
+                    case "in_progress":
+                        return <span style={{ color: "blue" }}>En Progreso</span>;
+                    case "completed":
+                        return <span style={{ color: "green" }}>Completado</span>;
+                    default:
+                        return "Desconocido";
+                }
+            },
+        },
+        {
+            title: "Fecha de Creación",
+            dataIndex: "created_at",
+            key: "created_at",
+            render: (text) => new Date(text).toLocaleString(),
+            ...getColumnDateRangeProps("created_at"),
+        },
+        {
+            title: "Fecha de Actualización",
+            dataIndex: "updated_at",
+            key: "updated_at",
+            render: (text) => new Date(text).toLocaleString(),
+            ...getColumnDateRangeProps("updated_at"),
+        },
+    ];
+
     return (
-        <div style={{ margin: '16px' }}>
+        <div style={{ margin: "16px" }}>
             <Button
                 type="primary"
                 onClick={exportToExcel}
@@ -157,7 +317,11 @@ function Registros() {
             </Button>
 
             <Card
-                style={{ marginTop: '16px', borderRadius: '10px', boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                style={{
+                    marginTop: "16px",
+                    borderRadius: "10px",
+                    boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.2)",
+                }}
                 bordered={true}
                 title="Historial de visitas"
             >
@@ -169,7 +333,7 @@ function Registros() {
                         emptyText: <Empty description="No hay datos disponibles" />,
                     }}
                     rowKey="id"
-                    scroll={{ x: true }} // Permite el desplazamiento horizontal
+                    scroll={{ x: true }}
                 />
             </Card>
         </div>

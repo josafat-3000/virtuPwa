@@ -1,11 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Spin, Alert } from 'antd';
-import {LoadingOutlined} from '@ant-design/icons';
+import { Card, Row, Col, Spin, Alert, Tag } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import { BrowserMultiFormatReader } from '@zxing/library';
 import { setScanResult, checkVisit, cleanScan, stopRecording, startRecording } from '../../../store/scanSlice';
 import 'antd/dist/reset.css';
 import './Validate.css';
+
+import { Form, Input, Button } from 'antd';
+
+
+
 
 function Validate() {
   const dispatch = useDispatch();
@@ -18,9 +23,8 @@ function Validate() {
 
   const [codeReader, setCodeReader] = useState(null);
 
-  // Efecto para inicializar y reiniciar el lector QR
   useEffect(() => {
-    if (isRecording&&isScanning) {
+    if (isRecording && isScanning) {
       if (!codeReader) {
         const reader = new BrowserMultiFormatReader();
         setCodeReader(reader);
@@ -33,21 +37,19 @@ function Validate() {
     return () => {
       handleStopScan();
     };
-  }, [isRecording,isScanning ,codeReader]);
+  }, [isRecording, isScanning, codeReader]);
 
-  // Efecto para manejar el resultado del escaneo
   useEffect(() => {
     if (scanResult) {
       dispatch(checkVisit(scanResult)).then(({ payload }) => {
         dispatch(stopRecording());
         if (payload) {
-          // Aquí puedes actualizar el estado de la visita
+          // Actualizar el estado de la visita
         }
       });
     }
   }, [scanResult]);
 
-  // Efecto para limpiar los datos cuando el modal se cierra
   useEffect(() => {
     if (!isScanning) {
       dispatch(cleanScan());
@@ -55,7 +57,6 @@ function Validate() {
     }
   }, [isScanning]);
 
-  // Reinicia el escáner
   const handleScan = () => {
     if (codeReader) {
       codeReader.decodeFromVideoDevice(null, 'video', (result, error) => {
@@ -69,50 +70,29 @@ function Validate() {
     }
   };
 
-  // Detiene el escaneo y limpia el lector
   const handleStopScan = () => {
     if (codeReader) {
       codeReader.reset();
-      setCodeReader(null);  // Reinicia el lector al cerrarse el modal
+      setCodeReader(null);
       console.log("Escaneo detenido y video parado");
     }
   };
 
-  // Definición de columnas para la tabla
-  const columns = [
-    {
-      title: 'ID de Visita',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Nombre del Visitante',
-      dataIndex: 'visitor_name',
-      key: 'visitor_name',
-    },
-    {
-      title: 'Compañía',
-      dataIndex: 'visitor_company',
-      key: 'visitor_company',
-    },
-    {
-      title: 'Razón de la Visita',
-      dataIndex: 'visit_reason',
-      key: 'visit_reason',
-    },
-    {
-      title: 'Estado',
-      dataIndex: 'status',
-      key: 'status',
-    },
-    {
-      title: 'Fecha de Visita',
-      dataIndex: 'visit_date',
-      key: 'visit_date',
-    },
-  ];
+  // Función para obtener el color según el estado
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'orange'; // Naranja para "Pendiente"
+      case 'in_progress':
+        return 'blue'; // Azul para "En Progreso"
+      case 'completed':
+        return 'green'; // Verde para "Completado"
+      default:
+        return 'gray'; // Gris para el caso por defecto
+    }
+  };
 
-  return (
+return (
     <>
       {isScanning && isRecording && (
         <>
@@ -122,34 +102,73 @@ function Validate() {
             <div className="corner top-right" />
             <div className="corner bottom-left" />
             <div className="corner bottom-right" />
-            <div className="scan-line" /> {/* Línea animada */}
+            <div className="scan-line" />
           </div>
           <Spin style={{ marginTop: '20px' }} indicator={<LoadingOutlined spin />} size="large" />
         </>
       )}
+
       {scanResult && (
         <div style={{ marginTop: "20px" }}>
           <strong>Resultado:</strong> {scanResult}
         </div>
       )}
+
       {error && (
         <Alert message="Error" description={error?.message || 'Error desconocido'} type="error" showIcon />
       )}
+
       {visitData && (
         <div style={{ marginTop: "20px", maxWidth: '100%', overflowX: 'auto' }}>
-          <Table
-            dataSource={[visitData]} // Asegúrate de que visitData sea un objeto; lo envolvemos en un array
-            columns={columns}
-            rowKey="id" // Si tienes un ID único, úsalo como key
-            pagination={false} // Desactiva la paginación si solo es una fila
-            scroll={{ x: 'max-content' }} // Ajusta el contenido horizontalmente y permite desplazamiento vertical
+          <Card
             style={{
-              backgroundColor: '#f0f2f5',
-              borderRadius: '8px',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              minWidth: '100%', // Asegúrate de que la tabla ocupe el ancho del contenedor
+              borderRadius: '8px',
+              backgroundColor: '#fff',
+              padding: '20px'
             }}
-          />
+            title={`Visita ID: ${visitData.id}`}
+          >
+            <Form layout="vertical">
+              <Row gutter={[16, 16]}>
+                {/* Columna para los campos y sus valores */}
+                <Col span={12}>
+                  <strong>Nombre del Visitante:</strong>
+                </Col>
+                <Col span={12}>
+                  <Input value={visitData.visitor_name} readOnly />
+                </Col>
+                <Col span={12}>
+                  <strong>Compañía:</strong>
+                </Col>
+                <Col span={12}>
+                  <Input value={visitData.visitor_company} readOnly />
+                </Col>
+                <Col span={12}>
+                  <strong>Razón de la Visita:</strong>
+                </Col>
+                <Col span={12}>
+                  <Input value={visitData.visit_reason} readOnly />
+                </Col>
+                <Col span={12}>
+                  <strong>Estado:</strong>
+                </Col>
+                <Col span={12}>
+                  <Tag color={getStatusColor(visitData.status)}>
+                    {visitData.status === 'pending' ? 'Pendiente' :
+                     visitData.status === 'in_progress' ? 'En Progreso' :
+                     'Completado'}
+                  </Tag>
+                </Col>
+                <Col span={12}>
+                  <strong>Fecha de la Visita:</strong>
+                </Col>
+                <Col span={12}>
+                  <Input value={new Date(visitData.visit_date).toLocaleString()} readOnly />
+                </Col>
+              </Row>
+            </Form>
+          </Card>
         </div>
       )}
     </>
