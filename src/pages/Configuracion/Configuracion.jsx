@@ -290,7 +290,7 @@ const Configuracion = () => {
       </Dragger> */}
 
         <div style={{ textAlign: 'left', backgroundColor: '#fff', padding: '20px 0', borderRadius: '8px' }}>
-          <Button icon={<PlusOutlined />} onClick={showAddModal} type="primary" style={{ marginRight: '10px' }}>
+          <Button icon={<PlusOutlined />} onClick={showAddModal} type="primary" style={{margin: '10px' }}>
             Registrar usuario
           </Button>
           <Modal title="Basic Modal" open={isAddVisible} footer={null} onOk={handleAddOk} onCancel={handleAddCancel}>
@@ -325,7 +325,7 @@ const Configuracion = () => {
           </Form.Item>
         </Form>
           </Modal>
-          <Button icon={<UploadOutlined />} type="default">
+          <Button style={{margin: '10px'}} icon={<UploadOutlined />} type="default">
             Importar usuarios
           </Button>
         </div>

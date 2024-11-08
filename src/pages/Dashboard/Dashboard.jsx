@@ -67,6 +67,7 @@ const columns = [
 
 const Dashboard = () => {
   const user = useSelector((state) => state.user.user.name);
+  const role = useSelector((state) => state.user.user.role);
   const { pending, in_progress } = useSelector((state) => state.visits);
   const [open, setOpen] = useState(false);
   const [openScan, setOpenScan] = useState(false);
@@ -79,8 +80,12 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
  
   useEffect(() => {
-    dispatch(fetchVisitStats()); // Obtén los datos al montar el componente
-  }, [dispatch]);
+    if (role != '2') {
+      dispatch(fetchVisitStats());
+    }
+  }, [dispatch, role]);
+  // Condicional para mostrar las tarjetas solo si el rol no es "user"
+  const displayRelevantInfo = role != '2';
 
 
   async function handleShare() {
@@ -204,23 +209,23 @@ const Dashboard = () => {
 
 
   const actions = [
-    {
-      title: 'Generar Nueva Visita',
-      description: 'Crea un nuevo registro de visita.',
-      icon: <PlusOutlined />,
-      action: () => showModal(),
+  {
+    title: 'Generar Nueva Visita',
+    description: 'Crea un nuevo registro de visita.',
+    icon: <PlusOutlined />,
+    action: () => showModal(),
+  },
+  ...(role != '2' ? [{
+    title: 'Validar Visita',
+    description: 'Verifica y confirma la visita.',
+    icon: <CheckCircleOutlined />,
+    action: () => {
+      setOpenScan(true);
+      dispatch(startScan());
+      dispatch(startRecording());
     },
-    {
-      title: 'Validar Visita',
-      description: 'Verifica y confirma la visita.',
-      icon: <CheckCircleOutlined />,
-      action: () => {
-        setOpenScan(true);
-        dispatch(startScan());
-        dispatch(startRecording());
-      },
-    }
-  ];
+  }] : []), // Solo agrega la acción si el rol es 'admin'
+];
   // Efecto para habilitar o deshabilitar el botón cuando cambia el estado de visitData
   useEffect(() => {
     if (visitData) {
@@ -230,7 +235,7 @@ const Dashboard = () => {
     }
   }, [visitData]); // Monitorea los cambios en visitData
 
-
+console.log(role)
   return (
     <div style={{ margin: '16px' }}>
       {user && (
@@ -442,80 +447,66 @@ const Dashboard = () => {
         <Validate />
       </Modal>
       </div>
-      <Title level={4}>Información Relevante</Title>
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <DashboardCard
-            icon={
-              <EyeOutlined
-                style={{
-                  color: "white",
-                  backgroundColor: "#026A9F",
-                  borderRadius: 20,
-                  fontSize: 24,
-                  padding: 8,
-                }}
+      {displayRelevantInfo && (
+        <>
+          <Title level={4}>Información Relevante</Title>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={12} lg={8}>
+              <DashboardCard
+                icon={
+                  <EyeOutlined
+                    style={{
+                      color: "white",
+                      backgroundColor: "#026A9F",
+                      borderRadius: 20,
+                      fontSize: 24,
+                      padding: 8,
+                    }}
+                  />
+                }
+                title={"Visitas presentes"}
+                value={in_progress}
               />
-            }
-            title={"Visitas presentes"}
-            value={in_progress}
-          />
-        </Col>
+            </Col>
 
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <DashboardCard
-            icon={
-              <ClockCircleOutlined
-                style={{
-                  color: "white",
-                  backgroundColor: "#026A9F",
-                  borderRadius: 20,
-                  fontSize: 24,
-                  padding: 8,
-                }}
+            <Col xs={24} sm={12} md={12} lg={8}>
+              <DashboardCard
+                icon={
+                  <ClockCircleOutlined
+                    style={{
+                      color: "white",
+                      backgroundColor: "#026A9F",
+                      borderRadius: 20,
+                      fontSize: 24,
+                      padding: 8,
+                    }}
+                  />
+                }
+                title={"Visitas esperadas"}
+                value={pending}
               />
-            }
-            title={"Visitas esperadas"}
-            value={pending}
-          />
-        </Col>
+            </Col>
 
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <DashboardCard
-            icon={
-              <LogoutOutlined
-                style={{
-                  color: "white",
-                  backgroundColor: "#026A9F",
-                  borderRadius: 20,
-                  fontSize: 24,
-                  padding: 8,
-                }}
+            <Col xs={24} sm={12} md={12} lg={8}>
+              <DashboardCard
+                icon={
+                  <LogoutOutlined
+                    style={{
+                      color: "white",
+                      backgroundColor: "#026A9F",
+                      borderRadius: 20,
+                      fontSize: 24,
+                      padding: 8,
+                    }}
+                  />
+                }
+                title={"Salidas"}
+                value={0} // Ajusta este valor según sea necesario
               />
-            }
-            title={"Salidas"}
-            value={0}
-          />
-        </Col>
-
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <DashboardCard
-            icon={
-              <CalendarOutlined
-                style={{
-                  color: "white",
-                  backgroundColor: "#026A9F",
-                  borderRadius: 20,
-                  fontSize: 24,
-                  padding: 8,
-                }}
-              />
-            }
-            title={"Visitas totales del día"}
-            value={0}
-          />
-        </Col>
-      </Row>
+            </Col>
+          </Row>
+        </>
+      )}
       <Button
             type="primary"
             shape="round"

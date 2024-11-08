@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Row, Col, Spin, Alert, Tag } from 'antd';
+import { Card, Row, Col, Spin, Alert, Tag} from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { BrowserMultiFormatReader } from '@zxing/library';
 import { setScanResult, checkVisit, cleanScan, stopRecording, startRecording } from '../../../store/scanSlice';
@@ -8,9 +8,6 @@ import 'antd/dist/reset.css';
 import './Validate.css';
 
 import { Form, Input, Button } from 'antd';
-
-
-
 
 function Validate() {
   const dispatch = useDispatch();
@@ -22,7 +19,7 @@ function Validate() {
   const visitData = useSelector((state) => state.scan.visitData);
 
   const [codeReader, setCodeReader] = useState(null);
-
+  const [alertInfo, setAlertInfo] = useState({ message: '', type: '', visible: false });
   useEffect(() => {
     if (isRecording && isScanning) {
       if (!codeReader) {
@@ -43,8 +40,12 @@ function Validate() {
     if (scanResult) {
       dispatch(checkVisit(scanResult)).then(({ payload }) => {
         dispatch(stopRecording());
-        if (payload) {
-          // Actualizar el estado de la visita
+        if (payload.status==='completed') {
+          setAlertInfo({
+          message: 'Error al validar información, visita completada previamente.',
+          type: 'error',
+          visible: true,
+        });
         }
       });
     }
@@ -91,7 +92,7 @@ function Validate() {
         return 'gray'; // Gris para el caso por defecto
     }
   };
-
+const closeAlert = () => setAlertInfo({ ...alertInfo, visible: false });
 return (
     <>
       {isScanning && isRecording && (
@@ -170,6 +171,16 @@ return (
             </Form>
           </Card>
         </div>
+        
+      )}
+      {alertInfo.visible && (
+        <Alert
+          message={alertInfo.message}
+          type={alertInfo.type}
+          closable
+          onClose={closeAlert}
+          style={{ marginBottom: '16px' }}
+        />
       )}
     </>
   );

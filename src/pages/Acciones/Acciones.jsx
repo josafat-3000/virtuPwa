@@ -15,6 +15,7 @@ import {
 import { createVisit } from '../../store/createVisitSlice';  // Ajusta el path correctamente
 
 const ActionsPage = () => {
+  const role = useSelector((state) => state.user.user.role);
   const [open, setOpen] = useState(false);
   const [openScan, setOpenScan] = useState(false);
   const [visitId, setVisitId] = useState(null);
@@ -146,23 +147,23 @@ const ActionsPage = () => {
 
 
   const actions = [
-    {
-      title: 'Generar Nueva Visita',
-      description: 'Crea un nuevo registro de visita.',
-      icon: <PlusOutlined />,
-      action: () => showModal(),
+  {
+    title: 'Generar Nueva Visita',
+    description: 'Crea un nuevo registro de visita.',
+    icon: <PlusOutlined />,
+    action: () => showModal(),
+  },
+  ...(role != '2' ? [{
+    title: 'Validar Visita',
+    description: 'Verifica y confirma la visita.',
+    icon: <CheckCircleOutlined />,
+    action: () => {
+      setOpenScan(true);
+      dispatch(startScan());
+      dispatch(startRecording());
     },
-    {
-      title: 'Validar Visita',
-      description: 'Verifica y confirma la visita.',
-      icon: <CheckCircleOutlined />,
-      action: () => {
-        setOpenScan(true);
-        dispatch(startScan());
-        dispatch(startRecording());
-      },
-    }
-  ];
+  }] : []), // Solo agrega la acción si el rol es 'admin'
+];
   // Efecto para habilitar o deshabilitar el botón cuando cambia el estado de visitData
   useEffect(() => {
     if (visitData) {
