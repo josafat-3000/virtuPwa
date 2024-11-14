@@ -53,6 +53,9 @@ const ForgotPassword = () => {
                 htmlType="submit"
                 className="forgot-password-button"
                 size="large"
+                style={{
+                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
+                }}
               >
                 Enviar enlace de recuperación
               </Button>

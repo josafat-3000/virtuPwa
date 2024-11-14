@@ -3,7 +3,7 @@ import { Form, Input, Button, Card, Typography, Row, Col, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import './LoginForm.css';
 import logo from '../../../assets/virtu.png';
-import { useNavigate,  Link} from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../../store/userSlice';
 
@@ -17,7 +17,7 @@ const LoginForm = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+
 
   const handleSignIn = async () => {
     try {
@@ -88,6 +88,9 @@ const LoginForm = () => {
                 className="login-button"
                 size="large"
                 loading={loading}
+                style={{
+                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
+                }}
               >
                 {loading ? 'Iniciando sesión' : 'Iniciar Sesión'}
               </Button>

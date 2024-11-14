@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Card, Button, Modal, Form, Input, Select, notification, Spin, Table } from 'antd';
 import { Upload, message } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
-import { fetchUser,fetchAllUsers, updateUser, deleteUser } from '../../store/configSlice';
-import {registerUser} from '../../store/registerSlice';
+import { fetchUser, fetchAllUsers, updateUser, deleteUser } from '../../store/configSlice';
+import { registerUser } from '../../store/registerSlice';
 const { Option } = Select;
 const roles = ['Admin', 'User', 'Guard'];
 const { Dragger } = Upload;
@@ -13,17 +13,17 @@ const Configuracion = () => {
   const dispatch = useDispatch();
   const currentUserId = useSelector((state) => state.user.user.id);
   const { user, users, loading, error } = useSelector((state) => state.config);
-  const [ userEdit, setUserEdit] = useState(null);
+  const [userEdit, setUserEdit] = useState(null);
   const [isEditVisible, setisEditVisible] = useState(false);
   const [isAddVisible, setIsAddVisible] = useState(false);
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   // Verificar si el usuario es administrador
-  
+
   useEffect(() => {
     dispatch(fetchUser(currentUserId));
-  }, [dispatch,currentUserId]);
-  
+  }, [dispatch, currentUserId]);
+
   // Cargar información de los usuarios si es administrador
   const isAdmin = user?.role_id === 1;
   useEffect(() => {
@@ -31,7 +31,7 @@ const Configuracion = () => {
       dispatch(fetchAllUsers());
     }
   }, [dispatch, isAdmin]);
-  
+
   // Mostrar modal para editar perfil (propio o de otro usuario)
   const showEditUserModal = (userToEdit) => {
     setUserEdit(userToEdit); // Guardar el usuario para editarlo en el formulario
@@ -51,12 +51,12 @@ const Configuracion = () => {
               message: 'Perfil actualizado',
               description: 'El perfil ha sido actualizado correctamente.',
             });
-  
+
             // Si es administrador, recargar lista de usuarios
             if (isAdmin) {
               dispatch(fetchAllUsers());
             }
-  
+
             // Recargar la información del perfil del usuario actual
             return dispatch(fetchUser(currentUserId));
           })
@@ -75,7 +75,7 @@ const Configuracion = () => {
         console.log('Validate Failed:', info);
       });
   };
-  
+
   const handleSubmit2 = () => {
     form2.validateFields()
       .then((values) => {
@@ -87,12 +87,12 @@ const Configuracion = () => {
               message: 'Perfil actualizado',
               description: 'El perfil ha sido actualizado correctamente.',
             });
-  
+
             // Si es administrador, recargar lista de usuarios
             if (isAdmin) {
               dispatch(fetchAllUsers());
             }
-  
+
             // Recargar la información del perfil del usuario actual
             return dispatch(fetchUser(currentUserId));
           })
@@ -111,7 +111,7 @@ const Configuracion = () => {
         console.log('Validate Failed:', info);
       });
   };
-  
+
 
   // Cancelar edición o cierre de modal
   const handleCancel = () => {
@@ -127,7 +127,7 @@ const Configuracion = () => {
         try {
           // Dispatch the delete action and wait for it to complete
           const resultAction = await dispatch(deleteUser(userToDelete.id));
-  
+
           if (deleteUser.fulfilled.match(resultAction)) {
             // Check if the result is successful
             notification.success({
@@ -187,7 +187,7 @@ const Configuracion = () => {
       dataIndex: 'role_id',
       key: 'role_id',
       width: 100,
-      render: (role) => roles[role-1],
+      render: (role) => roles[role - 1],
     },
     {
       title: 'Acciones',
@@ -242,8 +242,8 @@ const Configuracion = () => {
     <div style={{ padding: '24px' }}>
       {/* Card para editar la información del perfil propio */}
       <Card title="Editar tu perfil" style={{ marginBottom: '16px' }}>
-      {loading && <Spin tip="Cargando..." size="large" />}
-        {!loading&&<Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={user}>
+        {loading && <Spin tip="Cargando..." size="large" />}
+        {!loading && <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={user}>
           <Form.Item
             name="name"
             label="Nombre"
@@ -264,7 +264,9 @@ const Configuracion = () => {
           >
             <Input />
           </Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button style={{
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
+          }} type="primary" htmlType="submit">
             Guardar Cambios
           </Button>
         </Form>}
@@ -274,8 +276,8 @@ const Configuracion = () => {
       {isAdmin && (
         <Card title="Gestión de Usuarios">
           <h2>Importar Usuarios desde Excel</h2>
-      
-      {/* <Dragger
+
+          {/* <Dragger
         name="file"
         //beforeUpload={handleFile}
         multiple={false}
@@ -289,56 +291,58 @@ const Configuracion = () => {
         <p className="ant-upload-text">Haz clic o arrastra un archivo Excel para importarlo</p>
       </Dragger> */}
 
-        <div style={{ textAlign: 'left', backgroundColor: '#fff', padding: '20px 0', borderRadius: '8px' }}>
-          <Button icon={<PlusOutlined />} onClick={showAddModal} type="primary" style={{margin: '10px' }}>
-            Registrar usuario
-          </Button>
-          <Modal title="Basic Modal" open={isAddVisible} footer={null} onOk={handleAddOk} onCancel={handleAddCancel}>
-            <Form
-          name="register"
-          onFinish={handleAddOk}
-          layout="vertical"
-        >
-          <Form.Item
-            name="name"
-            label="Nombre"
-            rules={[{ required: true, message: 'Por favor ingresa tu nombre!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Correo Electrónico"
-            rules={[
-              { required: true, message: 'Por favor ingresa tu correo electrónico!' },
-              { type: 'email', message: 'El correo electrónico no es válido!' }
-            ]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
-              Registrar
+          <div style={{ textAlign: 'left', backgroundColor: '#fff', padding: '20px 0', borderRadius: '8px' }}>
+            <Button icon={<PlusOutlined />} onClick={showAddModal} type="primary" style={{ margin: '10px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)' }} >
+              Registrar usuario
             </Button>
-          </Form.Item>
-        </Form>
-          </Modal>
-          <Button style={{margin: '10px'}} icon={<UploadOutlined />} type="default">
-            Importar usuarios
-          </Button>
-        </div>
+            <Modal title="Basic Modal" open={isAddVisible} footer={null} onOk={handleAddOk} onCancel={handleAddCancel}>
+              <Form
+                name="register"
+                onFinish={handleAddOk}
+                layout="vertical"
+              >
+                <Form.Item
+                  name="name"
+                  label="Nombre"
+                  rules={[{ required: true, message: 'Por favor ingresa tu nombre!' }]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="email"
+                  label="Correo Electrónico"
+                  rules={[
+                    { required: true, message: 'Por favor ingresa tu correo electrónico!' },
+                    { type: 'email', message: 'El correo electrónico no es válido!' }
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                    Registrar
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Modal>
+            <Button style={{
+              margin: '10px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
+            }} icon={<UploadOutlined />} type="default">
+              Importar usuarios
+            </Button>
+          </div>
           {loading && <Spin tip="Cargando..." size="large" />}
           {error && <div style={{ color: 'red' }}>{error}</div>}
-          
+
           {/* Tabla para mostrar los usuarios solo si es Admin */}
           <Table dataSource={users} scroll={{ x: true }} columns={columns} rowKey="id" pagination={false} />
         </Card>
       )}
 
       {/* Modal para editar el perfil del usuario */}
-      <Modal title={'Editar Usuario' } open={isEditVisible} onOk={handleSubmit2} onCancel={handleCancel}>
+      <Modal title={'Editar Usuario'} open={isEditVisible} onOk={handleSubmit2} onCancel={handleCancel}>
         <Form form={form2} layout="vertical">
           <Form.Item
             name="name"
@@ -362,7 +366,7 @@ const Configuracion = () => {
             >
               <Select>
                 {roles.map((r, index) => (
-                  <Option key={index} value={index+1}>
+                  <Option key={index} value={index + 1}>
                     {r}
                   </Option>
                 ))}

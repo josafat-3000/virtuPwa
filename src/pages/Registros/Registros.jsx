@@ -116,8 +116,8 @@ function Registros() {
             "Placa del Vehículo": row.vehicle_plate || 'No disponible',
             "Fecha y Hora de la Visita": new Date(row.visit_date).toLocaleString(),
             "Usuario ID": row.user_id,
-            Estado: row.status === 'pending' ? 'Pendiente' : 
-                    row.status === 'in_progress' ? 'En Progreso' : 
+            Estado: row.status === 'pending' ? 'Pendiente' :
+                row.status === 'in_progress' ? 'En Progreso' :
                     'Completado',
             "Fecha de Creación": new Date(row.created_at).toLocaleString(),
             "Fecha de Actualización": new Date(row.updated_at).toLocaleString(),
@@ -149,7 +149,7 @@ function Registros() {
         XLSX.writeFile(workbook, "historial_visitas.xlsx");
     };
 
-     const getColumnSearchProps = (dataIndex) => ({
+    const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
             <div style={{ padding: 8 }}>
                 <Input
@@ -165,7 +165,9 @@ function Registros() {
                         onClick={() => confirm()}
                         icon={<SearchOutlined />}
                         size="small"
-                        style={{ width: 90 }}
+                        style={{
+                            width: 90, boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
+                        }}
                     >
                         Buscar
                     </Button>
@@ -311,7 +313,7 @@ function Registros() {
             <Button
                 type="primary"
                 onClick={exportToExcel}
-                style={{ marginBottom: 16 }}
+                style={{ marginBottom: '16px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)' }}
             >
                 Exportar a Excel
             </Button>
