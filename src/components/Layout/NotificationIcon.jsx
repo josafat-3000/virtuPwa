@@ -5,14 +5,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotifications, addNotification } from '../../store/notificationSlice.js';
 import { io } from 'socket.io-client';
 
-const backendUrl = '';
-const socketUrl = '';
+let backendUrl = '';
+let socketUrl = '';
 // Conectar al servidor de socket
+console.log(import.meta.env.VITE_ENV)
+
 if (import.meta.env.ENV === 'production') {
   backendUrl = import.meta.env.VITE_BACKEND_URL_PROD;
   socketUrl = backendUrl.replace('https://', 'wss://');
+  console.log(backendUrl)
+  console.log(socketUrl)
 }
-else {
+else if (import.meta.env.ENV === 'development') {
   backendUrl = import.meta.env.VITE_BACKEND_URL_DEV;
   socketUrl = backendUrl.replace('http://', 'ws://');
 }
