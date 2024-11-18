@@ -5,8 +5,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotifications, addNotification } from '../../store/notificationSlice.js';
 import { io } from 'socket.io-client';
 
+const backendUrl = '';
+const socketUrl = '';
 // Conectar al servidor de socket
-const socket = io(import.meta.env.VITE_BACKEND_URL);
+if (import.meta.env.ENV === 'production') {
+  backendUrl = import.meta.env.VITE_BACKEND_URL_PROD;
+  socketUrl = backendUrl.replace('https://', 'wss://');
+}
+else {
+  backendUrl = import.meta.env.VITE_BACKEND_URL_DEV;
+  socketUrl = backendUrl.replace('http://', 'ws://');
+}
+// Reemplaza 'https' por 'wss' en la URL, si existe.
+
+const socket = io(socketUrl);
 
 const NotificationIcon = () => {
   const dispatch = useDispatch();
@@ -17,12 +29,14 @@ const NotificationIcon = () => {
   useEffect(() => {
     // Obtener las notificaciones al cargar el componente
     dispatch(fetchNotifications());
-    console.log(notifications)
+
     // Escuchar notificaciones en tiempo real
     socket.on('notification', (message) => {
       dispatch(addNotification({ message, created_at: new Date().toISOString() }));
+
+      // Incrementar el contador si el dropdown no está visible
       if (!isDropdownVisible) {
-        setUnreadCount((prev) => prev + 1); // Incrementar solo si el dropdown no está visible
+        setUnreadCount((prev) => prev + 1);
       }
     });
 
@@ -30,16 +44,16 @@ const NotificationIcon = () => {
     return () => {
       socket.off('notification');
     };
-  }, [dispatch, isDropdownVisible]);
+  }, [dispatch]); // Eliminamos `isDropdownVisible` como dependencia
 
   // Función para manejar cuando el dropdown se abre o cierra
   const handleDropdownVisibleChange = (visible) => {
     if (visible) {
-      // Reiniciar el contador de notificaciones no leídas cuando se abre el dropdown
-      setUnreadCount(0);
+      setUnreadCount(0); // Resetear el contador solo cuando se abre el dropdown
     }
-    setIsDropdownVisible(visible); // Actualiza el estado de visibilidad
+    setIsDropdownVisible(visible);
   };
+
 
   // Definir el contenido del menú
   const menu = (
@@ -49,30 +63,22 @@ const NotificationIcon = () => {
       renderItem={(item, index) => (
         <div key={index}>
           <List.Item
-            style={{
-              padding: '8px 16px',
-            }}
+            style={{ padding: '8px 16px' }}
           >
             <List.Item.Meta
               title={<Typography.Text strong>Notificación de {item.notification_type}</Typography.Text>}
               description={
-                <>
-                  <Typography.Text>La Visita: {item.visit_id} ha hecho {item.notification_type}</Typography.Text>
-                </>
+                <Typography.Text>La Visita: {item.visit_id} ha hecho {item.notification_type}</Typography.Text>
               }
             />
           </List.Item>
           {index !== notifications.length - 1 && <Divider />}
         </div>
       )}
-      style={{
-        maxHeight: '300px',
-        overflowY: 'auto',
-        width: '300px',
-      }}
+      style={{ maxHeight: '300px', overflowY: 'auto', width: '300px' }}
     />
-
   );
+
 
   return (
     <Dropdown
