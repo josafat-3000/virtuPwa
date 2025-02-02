@@ -13,15 +13,13 @@ import {
   EyeOutlined, ClockCircleOutlined, LogoutOutlined, CalendarOutlined
 } from '@ant-design/icons';
 import { Card, Table, Empty, Statistic, Row, Col, Typography } from 'antd';
-
 import { fetchVisitStats } from '../../store/visitSlice.js'
 import './Dashboard.css';
 import { UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import TextField from '@mui/material/TextField';
-import dayjs from 'dayjs';
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const columns = [
   {
@@ -77,7 +75,8 @@ const Dashboard = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const dispatch = useDispatch();
   const qrRef = useRef();
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedDate, setSelectedDate] = useState();
+
 
   useEffect(() => {
     if (role != '2') {
@@ -235,7 +234,6 @@ const Dashboard = () => {
     }
   }, [visitData]); // Monitorea los cambios en visitData
 
-  console.log(role)
   return (
     <div style={{ margin: '16px' }}>
       {user && (
@@ -312,7 +310,7 @@ const Dashboard = () => {
 
             <Form.Item
               name="visitor_company"
-              label="Compañía del Visitante"
+              label="Empresa del Visitante"
             >
               <Input placeholder="Compañía del Visitante" />
             </Form.Item>
@@ -326,7 +324,7 @@ const Dashboard = () => {
 
             <Form.Item
               name="visit_material"
-              label="Materiales de la Visita"
+              label="Equipo/Herramientas/Otros"
             >
               <Input placeholder="Materiales de la Visita" />
             </Form.Item>
@@ -334,9 +332,8 @@ const Dashboard = () => {
             <Form.Item
               name="vehicle"
               valuePropName="checked"
-              label="¿Trae Vehículo?"
             >
-              <Checkbox onChange={handleVehicleChange}>¿Trae Vehículo?</Checkbox>
+              <Checkbox onChange={handleVehicleChange}>¿Ingresa con vehículo?</Checkbox>
             </Form.Item>
 
             {hasVehicle && (
@@ -374,7 +371,15 @@ const Dashboard = () => {
                     setSelectedDate(newValue); // Actualiza el estado local
                     form.setFieldsValue({ visit_date: newValue }); // Actualiza el valor en el formulario de Ant Design
                   }}
-                  renderInput={(params) => <TextField {...params} />}
+                  renderInput={(params) => <TextField
+                    {...params}
+                    fullWidth // Ajusta el campo al 100% del contenedor
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '40px', // Opcional: Ajusta la altura
+                      },
+                    }}
+                  />}
                 />
               </LocalizationProvider>
             </Form.Item>
@@ -400,17 +405,24 @@ const Dashboard = () => {
             ]}
 
           >
-            <div style={{
+            <div id="myqrcode" style={{
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              height: '200px', // O ajusta la altura según necesites
+              height: '350px', // O ajusta la altura según necesites
               textAlign: 'center',
-              padding: '50px',
+              padding: '10px',
               backgroundColor: 'white'
             }}
               ref={qrRef}>
-              <QRCode style={{ margin: '20px', padding: '10px' }} id="myqrcode" value={visitId.toString()} />  {/* Render the QR code with the visit ID */}
+              <Title level={4} style={{ marginBottom: 10 }}>
+                Instrucciones:
+              </Title>
+              <Text type="secondary" style={{ display: "block", marginTop: 10 }}>
+                Presentar el código QR en Acceso Visita. Acceso con identificación oficial.
+              </Text>
+              <QRCode style={{ margin: '20px', padding: '10px' }} value={visitId.toString()} />  {/* Render the QR code with the visit ID */}
             </div>
 
           </Modal>

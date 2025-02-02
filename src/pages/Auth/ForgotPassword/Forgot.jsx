@@ -4,16 +4,21 @@ import { Form, Input, Button, Card, Typography, message, Row, Col } from 'antd';
 import { MailOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom'; // Importa el Link
 import './Forgot.css'; // Estilos específicos para esta página
+import axios from 'axios';
 
 const { Title } = Typography;
 
 const ForgotPassword = () => {
+  
+  
+  const url_forgot = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/forgot`;
   const onFinish = async (values) => {
     try {
       // Reemplaza con tu endpoint para la recuperación de contraseña
-      await axios.post('/api/v1/auth/recover-password', { email: values.email });
+      await axios.post(url_forgot, { email: values.email });
       message.success('Enlace de recuperación enviado a tu correo electrónico');
     } catch (error) {
+      console.log(error)
       message.error('Hubo un problema al enviar el enlace de recuperación');
     }
   };

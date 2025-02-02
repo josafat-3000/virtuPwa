@@ -3,52 +3,52 @@ import { Badge, Dropdown, List, Typography, Divider } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotifications, addNotification } from '../../store/notificationSlice.js';
-import { io } from 'socket.io-client';
 
-let backendUrl = '';
-let socketUrl = '';
-// Conectar al servidor de socket
-console.log(import.meta.env.VITE_ENV)
-
-if (import.meta.env.ENV === 'production') {
-  backendUrl = import.meta.env.VITE_BACKEND_URL_PROD;
-  socketUrl = backendUrl.replace('https://', 'wss://');
-  console.log(backendUrl)
-  console.log(socketUrl)
-}
-else if (import.meta.env.ENV === 'development') {
-  backendUrl = import.meta.env.VITE_BACKEND_URL_DEV;
-  socketUrl = backendUrl.replace('http://', 'ws://');
-}
-// Reemplaza 'https' por 'wss' en la URL, si existe.
-
-const socket = io(socketUrl);
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const sseUrl = `${backendUrl}/api/v1/notifications/stream`;
 
 const NotificationIcon = () => {
+  console.log(sseUrl)
   const dispatch = useDispatch();
   const notifications = useSelector((state) => state.notifications.notifications);
-  const [unreadCount, setUnreadCount] = useState(0); // Contador de notificaciones no leídas
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   useEffect(() => {
-    // Obtener las notificaciones al cargar el componente
+    // Obtener las notificaciones iniciales al cargar el componente
     dispatch(fetchNotifications());
 
-    // Escuchar notificaciones en tiempo real
-    socket.on('notification', (message) => {
-      dispatch(addNotification({ message, created_at: new Date().toISOString() }));
+    // Configurar el cliente SSE con reintentos
+    let eventSource = new EventSource(sseUrl, { withCredentials: true });
+
+    // Manejar la conexión SSE
+    const handleSSE = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      dispatch(addNotification({ message: data.message, created_at: data.created_at }));
 
       // Incrementar el contador si el dropdown no está visible
       if (!isDropdownVisible) {
         setUnreadCount((prev) => prev + 1);
       }
-    });
-
-    // Limpiar el listener de socket al desmontar el componente
-    return () => {
-      socket.off('notification');
     };
-  }, [dispatch]); // Eliminamos `isDropdownVisible` como dependencia
+
+    eventSource.onmessage = handleSSE;
+
+    eventSource.onerror = () => {
+      console.error('Error connecting to SSE');
+      eventSource.close();
+      setTimeout(() => {
+        // Reintentar la conexión después de un tiempo
+        eventSource = new EventSource(sseUrl);
+      }, 5000); // Intentar reconectar después de 5 segundos
+    };
+
+    // Limpiar el EventSource al desmontar el componente
+    return () => {
+      eventSource.close();
+    };
+  }, [dispatch, isDropdownVisible]);
 
   // Función para manejar cuando el dropdown se abre o cierra
   const handleDropdownVisibleChange = (visible) => {
@@ -58,7 +58,6 @@ const NotificationIcon = () => {
     setIsDropdownVisible(visible);
   };
 
-
   // Definir el contenido del menú
   const menu = (
     <List
@@ -66,9 +65,7 @@ const NotificationIcon = () => {
       dataSource={notifications.slice().reverse()}
       renderItem={(item, index) => (
         <div key={index}>
-          <List.Item
-            style={{ padding: '8px 16px' }}
-          >
+          <List.Item style={{ padding: '8px 16px' }}>
             <List.Item.Meta
               title={<Typography.Text strong>Notificación de {item.notification_type}</Typography.Text>}
               description={
@@ -82,7 +79,6 @@ const NotificationIcon = () => {
       style={{ maxHeight: '300px', overflowY: 'auto', width: '300px' }}
     />
   );
-
 
   return (
     <Dropdown

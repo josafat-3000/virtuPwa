@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { QRCode, Card, Button, Row, Col, Modal, Form, Input, Checkbox, message } from 'antd';
+import { QRCode, Card, Button, Row, Col, Modal, Form, Input, Checkbox, message, Typography } from 'antd';
 import Validate from './Validate/ValidateModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { startRecording, startScan, stopScan, updateVisitStatus } from '../../store/scanSlice';
@@ -7,7 +7,7 @@ import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import TextField from '@mui/material/TextField';
 import dayjs from 'dayjs';
-
+const { Title, Text } = Typography;
 import {
   PlusOutlined,
   CheckCircleOutlined,
@@ -31,7 +31,7 @@ const ActionsPage = () => {
       const originalCanvas = qrRef.current.querySelector("canvas");
       const margin = 20; // Ajusta el tamaño del margen
       const width = originalCanvas.width + margin * 2; // Ancho total con margen
-      const height = originalCanvas.height + margin * 2; // Alto total con margen
+      const height = originalCanvas.height + margin * 2 + 80; // Alto total con margen
 
       // Crear un nuevo canvas
       const canvas = document.createElement("canvas");
@@ -45,6 +45,28 @@ const ActionsPage = () => {
 
       // Dibujar el canvas original en el nuevo canvas con margen
       context.drawImage(originalCanvas, margin, margin);
+
+      // Personalización del texto
+      const title = "Instrucciones:";
+      const text = "Presentar el código QR en Acceso Visita.";
+
+      // Establecer fuente y color
+      context.fillStyle = "black"; // Color del texto
+      context.font = "bold 18px Arial"; // Fuente y tamaño
+      context.textAlign = "center"; // Centrar el texto
+
+      // Título
+      context.fillText(title, width / 2, originalCanvas.height + margin + 20);
+
+      // Subtítulo
+      context.font = "italic 16px Arial"; // Fuente en cursiva para el texto
+      context.fillText(text, width / 2, originalCanvas.height + margin + 40);
+
+      // Sombra en el texto
+      context.shadowColor = "rgba(0, 0, 0, 0.5)";
+      context.shadowOffsetX = 2;
+      context.shadowOffsetY = 2;
+      context.shadowBlur = 4;
 
       // Obtener la URL de la imagen del nuevo canvas
       const qrImageURL = canvas.toDataURL("image/png");
@@ -323,11 +345,6 @@ const ActionsPage = () => {
           footer={[
             <Button style={{
               boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
-            }} key="close" onClick={() => setVisitId(null)}>
-              Cerrar
-            </Button>,
-            <Button style={{
-              boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
             }} key="share" type="primary" loading={loading} onClick={handleShare}>
               Compartir
             </Button>,
@@ -339,21 +356,29 @@ const ActionsPage = () => {
           ]}
 
         >
-          <div style={{
+          <div id="myqrcode" style={{
             display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            height: '200px', // O ajusta la altura según necesites
+            height: '350px', // O ajusta la altura según necesites
             textAlign: 'center',
-            padding: '50px',
+            padding: '10px',
             backgroundColor: 'white'
           }}
             ref={qrRef}>
-            <QRCode style={{ margin: '20px', padding: '10px' }} id="myqrcode" value={visitId.toString()} />  {/* Render the QR code with the visit ID */}
+            <Title level={4} style={{ marginBottom: 10 }}>
+              Instrucciones:
+            </Title>
+            <Text type="secondary" style={{ display: "block", marginTop: 10 }}>
+              Presentar el código QR en Acceso Visita. Acceso con identificación oficial.
+            </Text>
+            <QRCode style={{ margin: '20px', padding: '10px' }} value={visitId.toString()} />  {/* Render the QR code with the visit ID */}
           </div>
 
         </Modal>
-      )}
+      )
+      }
 
       <Modal
         title="Escanear código QR"

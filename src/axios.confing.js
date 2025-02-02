@@ -9,12 +9,13 @@ axios.interceptors.response.use(
     return response; // Devuelve la respuesta normal si todo está bien
   },
   (error) => {
+    console.log(error)
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       // Si obtenemos un error de autenticación, limpiar el estado y desloguear
       store.dispatch(logoutUser()); // Llamada a la acción de logout en Redux
       store.dispatch(clearUser());  // Limpia el estado del usuario en Redux
       sessionStorage.clear();       // Limpia el sessionStorage si es necesario
-      window.location.href = '/login'; // Redirige al login
+      //window.location.href = '/login'; // Redirige al login
     }
     return Promise.reject(error);
   }

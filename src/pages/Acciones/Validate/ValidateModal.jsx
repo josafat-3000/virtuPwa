@@ -133,38 +133,38 @@ return (
             <Form layout="vertical">
               <Row gutter={[16, 16]}>
                 {/* Columna para los campos y sus valores */}
-                <Col span={12}>
+                <Col span={10}>
                   <strong>Nombre del Visitante:</strong>
                 </Col>
-                <Col span={12}>
+                <Col span={14}>
                   <Input value={visitData.visitor_name} readOnly />
                 </Col>
-                <Col span={12}>
-                  <strong>Compañía:</strong>
+                <Col span={10}>
+                  <strong>Empresa:</strong>
                 </Col>
-                <Col span={12}>
+                <Col span={14}>
                   <Input value={visitData.visitor_company} readOnly />
                 </Col>
-                <Col span={12}>
+                <Col span={10}>
                   <strong>Razón de la Visita:</strong>
                 </Col>
-                <Col span={12}>
+                <Col span={14}>
                   <Input value={visitData.visit_reason} readOnly />
                 </Col>
-                <Col span={12}>
+                <Col span={10}>
                   <strong>Estado:</strong>
                 </Col>
-                <Col span={12}>
+                <Col span={14}>
                   <Tag color={getStatusColor(visitData.status)}>
                     {visitData.status === 'pending' ? 'Pendiente' :
                      visitData.status === 'in_progress' ? 'En Progreso' :
                      'Completado'}
                   </Tag>
                 </Col>
-                <Col span={12}>
+                <Col span={10}>
                   <strong>Fecha de la Visita:</strong>
                 </Col>
-                <Col span={12}>
+                <Col span={14}>
                   <Input value={new Date(visitData.visit_date).toLocaleString()} readOnly />
                 </Col>
               </Row>
