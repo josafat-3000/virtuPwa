@@ -10,6 +10,7 @@ import AccionsPage from './pages/Acciones/Acciones';
 import ProfilePage from './pages/Profile/Profile';
 import Configuracion from './pages/Configuracion/Configuracion';
 import Forgot from './pages/Auth/ForgotPassword/Forgot';
+import { ConfirmAccountForm, ResetPasswordForm} from './pages/Auth/ResetPassword/ResetPassword'
 const App = () => {
   return (
     <Router>
@@ -22,7 +23,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/forgot"
           element={
@@ -31,7 +32,18 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/reset/:token" element={
+          <ProtectedRoute redirectAuthenticatedTo="/">
+            <ResetPasswordForm />
+          </ProtectedRoute>
+          } 
+        />
+        <Route path="/confirm/:token" element={
+          <ProtectedRoute redirectAuthenticatedTo="/">
+            <ConfirmAccountForm />
+          </ProtectedRoute>
+          } 
+        />
         <Route
           path="/"
           element={

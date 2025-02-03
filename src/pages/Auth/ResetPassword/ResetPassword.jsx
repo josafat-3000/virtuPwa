@@ -1,58 +1,106 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useState } from 'react';
+import { Form, Input, Button, Card, Typography, Row, Col, message } from 'antd';
+import { LockOutlined } from '@ant-design/icons';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import logo from '../../../assets/virtu.png';
+import './Reset.css';
 
-const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
+const { Title } = Typography;
 
-  // Obtener el token desde la URL
-  const token = searchParams.get("token");
+const ResetPasswordForm = () => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const url_reset = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/reset`;
 
-  useEffect(() => {
-    if (!token) {
-      setMessage("Token inválido o expirado");
-    }
-  }, [token]);
-
-  const handlePasswordReset = async (e) => {
-    e.preventDefault();
-
-    if (!newPassword) {
-      setMessage("Por favor ingresa una nueva contraseña");
+  const handleReset = async () => {
+    if (password !== confirmPassword) {
+      message.error('Las contraseñas no coinciden');
       return;
     }
-
     try {
-      const response = await fetch("http://localhost:5000/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword }),
-      });
-
-      const data = await response.json();
-      setMessage(data.message);
+      console.log("token",token)
+      await axios.post(url_reset, { token, password });
+      message.success('Contraseña restablecida con éxito');
+      navigate('/login');
     } catch (error) {
-      setMessage("Error al restablecer la contraseña");
+      message.error('Error al restablecer la contraseña');
     }
   };
 
   return (
-    <div>
-      <h2>Restablecer Contraseña</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handlePasswordReset}>
-        <input
-          type="password"
-          placeholder="Nueva contraseña"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Restablecer</button>
-      </form>
-    </div>
+    <Row justify="center" align="middle" className="login-container">
+      <Col xs={22} sm={18} md={12} lg={10} xl={8}>
+        <Card className="login-card">
+          <div className="login-logo">
+            <img src={logo} alt="Logo" className="logo-image" />
+            <LockOutlined className="lock-icon" />
+          </div>
+          <Title level={4}>Restablecer Contraseña</Title>
+          <Form onFinish={handleReset} className="login-form">
+            <Form.Item name="password" rules={[{ required: true, message: 'Introduce una nueva contraseña' }]}> 
+              <Input.Password prefix={<LockOutlined />} placeholder="Nueva contraseña" size="large" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </Form.Item>
+            <Form.Item name="confirmPassword" rules={[{ required: true, message: 'Confirma tu nueva contraseña' }]}> 
+              <Input.Password prefix={<LockOutlined />} placeholder="Confirmar contraseña" size="large" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="login-button" size="large">Restablecer</Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Col>
+    </Row>
   );
 };
 
-export default ResetPassword;
+const ConfirmAccountForm = () => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const url_confirm = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/confirm`;
+
+  const handleReset = async () => {
+    if (password !== confirmPassword) {
+      message.error('Las contraseñas no coinciden');
+      return;
+    }
+    try {
+      await axios.post(url_confirm, { token, password });
+      message.success('Contraseña restablecida con éxito');
+      navigate('/login');
+    } catch (error) {
+      message.error('Error al restablecer la contraseña');
+    }
+  };
+
+  return (
+    <Row justify="center" align="middle" className="login-container">
+      <Col xs={22} sm={18} md={12} lg={10} xl={8}>
+        <Card className="login-card">
+          <div className="login-logo">
+            <img src={logo} alt="Logo" className="logo-image" />
+            <LockOutlined className="lock-icon" />
+          </div>
+          <Title level={4}>Confirmar cuenta y establecer contraseña</Title>
+          <Form onFinish={handleReset} className="login-form">
+            <Form.Item name="password" rules={[{ required: true, message: 'Introduce una nueva contraseña' }]}> 
+              <Input.Password prefix={<LockOutlined />} placeholder="Nueva contraseña" size="large" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </Form.Item>
+            <Form.Item name="confirmPassword" rules={[{ required: true, message: 'Confirma tu nueva contraseña' }]}> 
+              <Input.Password prefix={<LockOutlined />} placeholder="Confirmar contraseña" size="large" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="login-button" size="large">Restablecer</Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Col>
+    </Row>
+  );
+};
+
+export { ResetPasswordForm, ConfirmAccountForm };
