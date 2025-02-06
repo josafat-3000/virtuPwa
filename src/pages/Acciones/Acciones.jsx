@@ -124,6 +124,7 @@ const ActionsPage = () => {
       console.error('No se pudo encontrar el canvas del código QR.');
     }
   };
+
   const { loading, visit } = useSelector((state) => state.createVisit);
   const { visitData } = useSelector((state) => state.scan);
 
@@ -155,7 +156,6 @@ const ActionsPage = () => {
     }
   };
 
-
   const handleCancel = () => {
     setOpen(false);
     form.resetFields();
@@ -165,8 +165,6 @@ const ActionsPage = () => {
   const handleVehicleChange = (e) => {
     setHasVehicle(e.target.checked);
   };
-
-
 
   const actions = [
     {

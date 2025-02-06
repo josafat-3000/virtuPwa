@@ -1,148 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Button, Modal, Form, Input, Select, notification, Spin, Table } from 'antd';
-import { Upload, message } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Card, Button, Modal, Form, Input, Select, notification, Spin, Table, Upload, App } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
 import { fetchUser, fetchAllUsers, updateUser, deleteUser } from '../../store/configSlice';
-import { registerUser } from '../../store/registerSlice';
-const { Option } = Select;
-const roles = ['Admin', 'User', 'Guard'];
+import { registerUser, registerUsersBulk } from '../../store/registerSlice';
+import * as XLSX from 'xlsx';
+
 const { Dragger } = Upload;
+const { Option } = Select;
+const ROLES = ['Admin', 'User', 'Guard'];
 
 const Configuracion = () => {
   const dispatch = useDispatch();
+  const [editingUser, setEditingUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [modals, setModals] = useState({ add: false, edit: false });
+  const [form] = Form.useForm();
+  const [fileData, setFileData] = useState(null);
+  const [validationError, setValidationError] = useState('');
   const currentUserId = useSelector((state) => state.user.user.id);
   const { user, users, loading, error } = useSelector((state) => state.config);
-  const [userEdit, setUserEdit] = useState(null);
-  const [isEditVisible, setisEditVisible] = useState(false);
-  const [isAddVisible, setIsAddVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [form2] = Form.useForm();
-  // Verificar si el usuario es administrador
+  const isAdmin = user?.role_id === 1;
+  const { modal, notification } = App.useApp(); // Obtén desde el contexto
 
+  // Efectos
   useEffect(() => {
     dispatch(fetchUser(currentUserId));
-  }, [dispatch, currentUserId]);
+    if (isAdmin) dispatch(fetchAllUsers());
+  }, [dispatch, currentUserId, isAdmin]);
 
-  // Cargar información de los usuarios si es administrador
-  const isAdmin = user?.role_id === 1;
-  useEffect(() => {
-    if (isAdmin) {
-      dispatch(fetchAllUsers());
-    }
-  }, [dispatch, isAdmin]);
+  // Handlers
+  const toggleEdit = () => setIsEditing(!isEditing);
 
-  // Mostrar modal para editar perfil (propio o de otro usuario)
-  const showEditUserModal = (userToEdit) => {
-    setUserEdit(userToEdit); // Guardar el usuario para editarlo en el formulario
-    form2.setFieldsValue(userToEdit); // Establecer valores del formulario
-    setisEditVisible(true);
+  // Función mejorada para manejar archivos
+  const handleFileUpload = (file) => {
+    setValidationError('');
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const workbook = XLSX.read(e.target.result, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Validación básica de estructura
+        if (!jsonData[0]?.Nombre || !jsonData[0]?.Email || !jsonData[0]?.Rol) {
+          setValidationError('El archivo no tiene el formato correcto');
+          return;
+        }
+
+        setFileData(jsonData);
+      } catch (error) {
+        setValidationError('Error al leer el archivo');
+      }
+    };
+
+    reader.onerror = () => {
+      setValidationError('Error al cargar el archivo');
+    };
+
+    reader.readAsArrayBuffer(file);
+    return false; // Previene subida automática
   };
 
-  // Guardar cambios en perfil o usuario editado
-  const handleSubmit = () => {
-    form.validateFields()
-      .then((values) => {
-        // Comprobar si se está editando un usuario
-        dispatch(updateUser({ id: user.id, data: values }))
-          .unwrap() // Para asegurarse de que el dispatch regrese una promesa correctamente manejada
-          .then(() => {
-            notification.success({
-              message: 'Perfil actualizado',
-              description: 'El perfil ha sido actualizado correctamente.',
-            });
-
-            // Si es administrador, recargar lista de usuarios
-            if (isAdmin) {
-              dispatch(fetchAllUsers());
-            }
-
-            // Recargar la información del perfil del usuario actual
-            return dispatch(fetchUser(currentUserId));
-          })
-          .then(() => {
-            form.resetFields(); // Restablecer los campos del formulario con los nuevos datos
-            setisEditVisible(false); // Cerrar el modal
-          })
-          .catch((error) => {
-            notification.error({
-              message: 'Error al actualizar',
-              description: `No se pudo actualizar el perfil: ${error.message}`,
-            });
-          });
-      })
-      .catch((info) => {
-        console.log('Validate Failed:', info);
-      });
-  };
-
-  const handleSubmit2 = () => {
-    form2.validateFields()
-      .then((values) => {
-        // Comprobar si se está editando un usuario
-        dispatch(updateUser({ id: userEdit.id, data: values }))
-          .unwrap() // Para asegurarse de que el dispatch regrese una promesa correctamente manejada
-          .then(() => {
-            notification.success({
-              message: 'Perfil actualizado',
-              description: 'El perfil ha sido actualizado correctamente.',
-            });
-
-            // Si es administrador, recargar lista de usuarios
-            if (isAdmin) {
-              dispatch(fetchAllUsers());
-            }
-
-            // Recargar la información del perfil del usuario actual
-            return dispatch(fetchUser(currentUserId));
-          })
-          .then(() => {
-            form.resetFields(); // Restablecer los campos del formulario con los nuevos datos
-            setisEditVisible(false); // Cerrar el modal
-          })
-          .catch((error) => {
-            notification.error({
-              message: 'Error al actualizar',
-              description: `No se pudo actualizar el perfil: ${error.message}`,
-            });
-          });
-      })
-      .catch((info) => {
-        console.log('Validate Failed:', info);
-      });
-  };
-
-
-  // Cancelar edición o cierre de modal
-  const handleCancel = () => {
-    form.resetFields();
-    setisEditVisible(false);
-  };
-
-  const handleDelete = (userToDelete) => {
-    Modal.confirm({
+   const handleDelete = (userToDelete) => {
+    modal.confirm({ // Usa la instancia de modal del contexto
       title: 'Eliminar Usuario',
       content: `¿Estás seguro de que deseas eliminar a ${userToDelete.name}?`,
       onOk: async () => {
         try {
-          // Dispatch the delete action and wait for it to complete
           const resultAction = await dispatch(deleteUser(userToDelete.id));
-
+          
           if (deleteUser.fulfilled.match(resultAction)) {
-            // Check if the result is successful
-            notification.success({
+            notification.success({ // Usa la instancia de notification del contexto
               message: 'Usuario Eliminado',
               description: resultAction.payload.message || 'El usuario ha sido eliminado con éxito.',
             });
           } else if (deleteUser.rejected.match(resultAction)) {
-            // Check if the result is an error
             notification.error({
               message: 'Error',
               description: resultAction.payload || 'No se pudo eliminar el usuario.',
             });
           }
         } catch (error) {
-          // Handle unexpected errors
           notification.error({
             message: 'Error',
             description: `No se pudo eliminar el usuario: ${error.message}`,
@@ -152,228 +92,268 @@ const Configuracion = () => {
     });
   };
 
-  const showAddModal = () => {
-    setIsAddVisible(true);
+  // Función de importación mejorada
+  const handleImport = async () => {
+    if (!fileData) {
+      notification.error({ message: 'Selecciona un archivo primero' });
+      return;
+    }
+
+    try {
+      // Transformar datos al formato esperado por el backend
+      const formattedData = fileData.map(item => ({
+        name: item.Nombre,
+        email: item.Email,
+        role_id: ROLES.indexOf(item.Rol) + 1
+      }));
+      console.log(formattedData)
+      await dispatch(registerUsersBulk(formattedData)).unwrap();
+
+      notification.success({
+        message: `Importación exitosa`,
+        description: `${fileData.length} usuarios importados correctamente`
+      });
+
+      // Resetear estado
+      setFileData(null);
+      setModals({ ...modals, import: false });
+      dispatch(fetchAllUsers());
+
+    } catch (error) {
+      console.log(error)
+      notification.error({
+        message: 'Error en importación',
+        description: error.message || 'Verifica el formato del archivo'
+      });
+    }
   };
-  const handleAddOk = (values) => {
-    dispatch(registerUser(values))
-    setIsAddVisible(false);
+
+  const downloadTemplate = () => {
+    const csvContent = "Nombre,Email,Rol\nEjemplo Usuario,ejemplo@correo.com,User";
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "plantilla-usuarios.csv";
+    link.click();
   };
-  const handleAddCancel = () => {
-    setIsAddVisible(false);
-  };
-  // Columnas de la tabla para mostrar usuarios (solo admin puede ver esto)
-  const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 50,
-    },
-    {
-      title: 'Nombre',
-      dataIndex: 'name',
-      key: 'name',
-      width: 150,
-    },
-    {
-      title: 'Correo Electrónico',
-      dataIndex: 'email',
-      key: 'email',
-      width: 200,
-    },
+
+  // Columnas de la tabla
+  const columns = useMemo(() => [
+    { title: 'ID', dataIndex: 'id', key: 'id', width: 50 },
+    { title: 'Nombre', dataIndex: 'name', key: 'name', width: 150 },
+    { title: 'Email', dataIndex: 'email', key: 'email', width: 200 },
     {
       title: 'Rol',
       dataIndex: 'role_id',
       key: 'role_id',
-      width: 100,
-      render: (role) => roles[role - 1],
+      render: roleId => ROLES[roleId - 1]
     },
     {
       title: 'Acciones',
       key: 'actions',
-      width: 100,
-      render: (text, record) => (
-        <div>
-          <Button icon={<EditOutlined />} onClick={() => showEditUserModal(record)} style={{ marginRight: 8 }} />
-          {isAdmin && (
-            <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record)} danger />
-          )}
-        </div>
-      ),
-    },
-  ];
-
-  // const handleFile = (file) => {
-  //   const reader = new FileReader();
-
-  //   reader.onload = (e) => {
-  //     const binaryStr = e.target.result;
-  //     const workbook = XLSX.read(binaryStr, { type: "binary" });
-
-  //     // Solo leer la primera hoja
-  //     const firstSheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[firstSheetName];
-
-  //     // Convertir los datos a formato JSON
-  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-  //     // Aquí puedes validar y enviar los datos al backend
-  //     setData(jsonData);
-  //     console.log("Datos importados:", jsonData);
-  //   };
-
-  //   reader.readAsBinaryString(file);
-  //   return false; // Evita que se suba automáticamente el archivo
-  // };
-
-
-  // const submitData = async () => {
-  //   try {
-  //     // Supongamos que tienes una API para registrar usuarios
-  //     const response = await axios.post("/api/register-users", data);
-  //     message.success("Usuarios registrados correctamente.");
-  //   } catch (error) {
-  //     message.error("Error al registrar los usuarios.");
-  //   }
-  // };
+      render: (_, record) => (
+        <>
+          <Button icon={<EditOutlined />} onClick={() => {
+            setEditingUser(record);
+            form.setFieldsValue(record);
+            setModals(prev => ({ ...prev, edit: true }));
+          }} />
+          {isAdmin && <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record)} />}
+        </>
+      )
+    }
+  ], [form, isAdmin]);
 
   return (
-    <div style={{ padding: '24px' }}>
-      {/* Card para editar la información del perfil propio */}
-      <Card title="Editar tu perfil" style={{ marginBottom: '16px' }}>
-        {loading && <Spin tip="Cargando..." size="large" />}
-        {!loading && <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={user}>
-          <Form.Item
-            name="name"
-            label="Nombre"
-            rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label="Correo Electrónico"
-            rules={[{ required: true, message: 'Por favor ingresa tu correo electrónico' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="phone"
-            label="Número de teléfono"
-          >
-            <Input />
-          </Form.Item>
-          <Button style={{
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
-          }} type="primary" htmlType="submit">
-            Guardar Cambios
-          </Button>
-        </Form>}
-      </Card>
-
-      {/* Card para gestionar usuarios (solo visible para administradores) */}
-      {isAdmin && (
-        <Card title="Gestión de Usuarios">
-          <h2>Importar Usuarios desde Excel</h2>
-
-          {/* <Dragger
-        name="file"
-        //beforeUpload={handleFile}
-        multiple={false}
-        accept=".xlsx, .xls"
-        showUploadList={false}
+    <div style={{ padding: 24 }}>
+      {/* Sección de perfil */}
+      <Card
+        title="Tu perfil"
+        extra={!isEditing && <Button icon={<EditOutlined />} onClick={toggleEdit} />}
         style={{ marginBottom: 16 }}
       >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">Haz clic o arrastra un archivo Excel para importarlo</p>
-      </Dragger> */}
-
-          <div style={{ textAlign: 'left', backgroundColor: '#fff', padding: '20px 0', borderRadius: '8px' }}>
-            <Button icon={<PlusOutlined />} onClick={showAddModal} type="primary" style={{ margin: '10px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)' }} >
-              Registrar usuario
+        {isEditing ? (
+          <Form form={form} onFinish={() => {
+            dispatch(updateUser({ id: user.id, data: form.getFieldsValue() }))
+              .then(() => {
+                notification.success({ message: 'Perfil actualizado' });
+                setIsEditing(false);
+                dispatch(fetchUser(currentUserId));
+              });
+          }}>
+            <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="phone" label="Teléfono">
+              <Input />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+              Guardar
             </Button>
-            <Modal title="Basic Modal" open={isAddVisible} footer={null} onOk={handleAddOk} onCancel={handleAddCancel}>
-              <Form
-                name="register"
-                onFinish={handleAddOk}
-                layout="vertical"
-              >
-                <Form.Item
-                  name="name"
-                  label="Nombre"
-                  rules={[{ required: true, message: 'Por favor ingresa tu nombre!' }]}
-                >
-                  <Input />
-                </Form.Item>
+            <Button onClick={toggleEdit}>Cancelar</Button>
+          </Form>
+        ) : (
+          <div>
+            <p><strong>Nombre:</strong> {user?.name}</p>
+            <p><strong>Email:</strong> {user?.email}</p>
+            <p><strong>Teléfono:</strong> {user?.phone || 'N/A'}</p>
+          </div>
+        )}
+      </Card>
 
-                <Form.Item
-                  name="email"
-                  label="Correo Electrónico"
-                  rules={[
-                    { required: true, message: 'Por favor ingresa tu correo electrónico!' },
-                    { type: 'email', message: 'El correo electrónico no es válido!' }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
+      {isAdmin && (
+        <Card title="Gestión de usuarios">
+          <div style={{ marginBottom: 16 }}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setModals({ ...modals, add: true })}
+              style={{ marginRight: 8 }}
+            >
+              Nuevo usuario
+            </Button>
 
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
-                    Registrar
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Modal>
-            <Button style={{
-              margin: '10px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
-            }} icon={<UploadOutlined />} type="default">
+            {/* Botón para abrir modal de importación */}
+            <Button
+              icon={<UploadOutlined />}
+              onClick={() => setModals({ ...modals, import: true })} // Nuevo estado para el modal
+              style={{ marginRight: 8 }}
+            >
               Importar usuarios
             </Button>
-          </div>
-          {loading && <Spin tip="Cargando..." size="large" />}
-          {error && <div style={{ color: 'red' }}>{error}</div>}
 
-          {/* Tabla para mostrar los usuarios solo si es Admin */}
-          <Table dataSource={users} scroll={{ x: true }} columns={columns} rowKey="id" pagination={false} />
+            <Button
+              type="link"
+              onClick={downloadTemplate}
+            >
+              Descargar plantilla
+            </Button>
+          </div>
+
+          <Table
+            dataSource={users}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            scroll={{ x: true }}
+          />
         </Card>
       )}
 
-      {/* Modal para editar el perfil del usuario */}
-      <Modal title={'Editar Usuario'} open={isEditVisible} onOk={handleSubmit2} onCancel={handleCancel}>
-        <Form form={form2} layout="vertical">
-          <Form.Item
-            name="name"
-            label="Nombre"
-            rules={[{ required: true, message: 'Por favor ingresa el nombre' }]}
-          >
+      {/* Modales */}
+      <Modal
+        title="Nuevo usuario"
+        open={modals.add}
+        onCancel={() => setModals({ ...modals, add: false })}
+        footer={null}
+      >
+        <Form
+          onFinish={(values) => {
+            dispatch(registerUser(values))
+              .then(() => {
+                notification.success({ message: 'Usuario registrado' });
+                setModals({ ...modals, add: false });
+                dispatch(fetchAllUsers());
+              });
+          }}
+        >
+          <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item
-            name="email"
-            label="Correo Electrónico"
-            rules={[{ required: true, message: 'Por favor ingresa el correo electrónico' }]}
-          >
+          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
             <Input />
           </Form.Item>
-          {isAdmin && user && (
-            <Form.Item
-              name="role_id"
-              label="Rol"
-              rules={[{ required: true, message: 'Por favor selecciona un rol' }]}
-            >
-              <Select>
-                {roles.map((r, index) => (
-                  <Option key={index} value={index + 1}>
-                    {r}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
+          
+          <Button type="primary" htmlType="submit">Registrar</Button>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Editar usuario"
+        open={modals.edit}
+        onCancel={() => setModals({ ...modals, edit: false })}
+        footer={null}
+      >
+        <Form
+          form={form}
+          onFinish={(values) => {
+            dispatch(updateUser({ id: editingUser.id, data: values }))
+              .then(() => {
+                notification.success({ message: 'Usuario actualizado' });
+                setModals({ ...modals, edit: false });
+                dispatch(fetchAllUsers());
+              });
+          }}
+        >
+          <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="role_id" label="Rol" rules={[{ required: true }]}>
+            <Select>
+              {ROLES.map((role, index) => (
+                <Option key={index} value={index + 1}>{role}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Button type="primary" htmlType="submit">Guardar cambios</Button>
+        </Form>
+      </Modal>
+      {/* Modal de Importación */}
+      <Modal
+        title="Importar usuarios desde Excel/CSV"
+        open={modals.import}
+        onCancel={() => {
+          setModals({ ...modals, import: false });
+          setFileData(null);
+          setValidationError('');
+        }}
+        onOk={handleImport}
+        confirmLoading={loading}
+        okText="Importar"
+        cancelText="Cancelar"
+        okButtonProps={{ disabled: !fileData || !!validationError }}
+      >
+        <Dragger
+          accept=".xlsx, .xls, .csv"
+          beforeUpload={handleFileUpload}
+          showUploadList={false}
+          disabled={loading}
+        >
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">
+            {fileData ? `Archivo listo: ${fileData.length} registros` : "Arrastra el archivo aquí"}
+          </p>
+          <p className="ant-upload-hint">
+            {validationError || "Formatos soportados: .xlsx, .xls, .csv"}
+          </p>
+        </Dragger>
+
+        {fileData && (
+          <div style={{ marginTop: 16 }}>
+            <Table
+              size="small"
+              dataSource={fileData.slice(0, 5)}
+              pagination={false}
+              rowKey={(record) => record.Email}
+              columns={[
+                { title: 'Nombre', dataIndex: 'Nombre' },
+                { title: 'Email', dataIndex: 'Email' },
+                { title: 'Rol', dataIndex: 'Rol' }
+              ]}
+            />
+            {fileData.length > 5 && (
+              <p style={{ marginTop: 8 }}>+ {fileData.length - 5} registros adicionales...</p>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );
