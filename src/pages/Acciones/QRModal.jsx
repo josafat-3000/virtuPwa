@@ -11,25 +11,25 @@ const QRModal = ({ visitId, onClose, loading }) => {
       const originalCanvas = qrRef.current.querySelector('canvas');
       const canvas = document.createElement('canvas');
       const margin = 20;
-      
+
       canvas.width = originalCanvas.width + margin * 2;
       canvas.height = originalCanvas.height + margin * 2 + 80;
       const ctx = canvas.getContext('2d');
-      
+
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(originalCanvas, margin, margin);
-      
+
       ctx.fillStyle = 'black';
       ctx.font = 'bold 18px Arial';
       ctx.textAlign = 'center';
       ctx.fillText('Instrucciones:', canvas.width / 2, originalCanvas.height + margin + 20);
-      
+
       ctx.font = 'italic 16px Arial';
       ctx.fillText('Presentar el código QR en Acceso Visita.', canvas.width / 2, originalCanvas.height + margin + 40);
 
       const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      
+
       if (navigator.share) {
         await navigator.share({
           files: [new File([image], 'qr-code.png', { type: 'image/png' })],
@@ -67,7 +67,15 @@ const QRModal = ({ visitId, onClose, loading }) => {
         </Button>
       ]}
     >
-      <div ref={qrRef} style={{ textAlign: 'center', padding: 20, background: 'white' }}>
+      <div ref={qrRef} style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: 20,
+        background: "white",
+      }}>
         <Title level={4} style={{ marginBottom: 10 }}>Instrucciones:</Title>
         <Text type="secondary" style={{ display: 'block', marginBottom: 20 }}>
           Presentar el código QR en Acceso Visita. Acceso con identificación oficial.
