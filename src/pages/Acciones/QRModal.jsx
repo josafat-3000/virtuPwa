@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
-import { Modal, Button, Typography, QRCode } from 'antd';
+import { Modal, Button, Typography, QRCode, Row, Col, Card } from 'antd';
 
 const { Title, Text } = Typography;
 
-const QRModal = ({ visitId, onClose, loading }) => {
+const QRModal = ({ visit, onClose, loading }) => {
   const qrRef = useRef();
 
   const handleShare = async () => {
@@ -52,10 +52,16 @@ const QRModal = ({ visitId, onClose, loading }) => {
     }
   };
 
+  // 🔹 Campos específicos a mostrar en formato transpuesto
+  const selectedFields = [
+    { key: 'visitor_name', label: 'Nombre' },
+    { key: 'visit_date', label: 'Fecha' },
+  ];
+
   return (
     <Modal
       title="Código QR de la Visita"
-      open={!!visitId}
+      open={!!visit?.id}
       centered
       onCancel={onClose}
       footer={[
@@ -76,11 +82,31 @@ const QRModal = ({ visitId, onClose, loading }) => {
         padding: 20,
         background: "white",
       }}>
-        <Title level={4} style={{ marginBottom: 10 }}>Instrucciones:</Title>
+        {/* 🔹 Diseño transpuesto (Etiqueta - Valor) */}
+        <Card style={{ width: '100%', padding:0 }}>
+        <Title level={4}>Información de la visita:</Title>
+          <Row gutter={[16, 8]}>
+            {selectedFields.map(({ key, label }) => (
+              visit[key] && (
+                <React.Fragment key={key}>
+                  <Col xs={10} sm={8} md={6}>
+                    <Text strong>{label}:</Text>
+                  </Col>
+                  <Col xs={14} sm={16} md={18}>
+                    <Text>{visit[key]}</Text>
+                  </Col>
+                </React.Fragment>
+              )
+            ))}
+          </Row>
+        </Card>
+
+        <Title level={4} style={{ marginTop: 20 }}>Instrucciones:</Title>
         <Text type="secondary" style={{ display: 'block', marginBottom: 20 }}>
           Presentar el código QR en Acceso Visita. Acceso con identificación oficial.
         </Text>
-        <QRCode value={visitId.toString()} size={200} />
+
+        {visit?.id && <QRCode value={visit.id.toString()} size={200} />}
       </div>
     </Modal>
   );

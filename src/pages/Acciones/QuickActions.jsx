@@ -12,7 +12,7 @@ const ActionsPage = () => {
   const role = useSelector((state) => state.user.user.role);
   const [open, setOpen] = useState(false);
   const [openScan, setOpenScan] = useState(false);
-  const [visitId, setVisitId] = useState(null);
+  const [visit, setVisit] = useState(null);
   const [hasVehicle, setHasVehicle] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const dispatch = useDispatch();
@@ -24,8 +24,8 @@ const ActionsPage = () => {
   const handleCreateVisit = async (values) => {
     try {
       const result = await dispatch(createVisit(values)).unwrap();
-      if (result?.id) {
-        setVisitId(result.id);
+      if (result) {
+        setVisit(result);
         setOpen(false);
         message.success('Visita creada exitosamente');
       }
@@ -75,10 +75,10 @@ const ActionsPage = () => {
         setHasVehicle={setHasVehicle}
       />
       
-      {visitId && (
+      {visit && (
         <QRModal 
-          visitId={visitId} 
-          onClose={() => setVisitId(null)}
+          visit={visit} 
+          onClose={() => setVisit(null)}
           loading={loading}
         />
       )}
