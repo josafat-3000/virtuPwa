@@ -45,7 +45,7 @@ const ActionsPage = () => {
       icon: 'PlusOutlined',
       action: showModal,
     },
-    ...(role !== '2' ? [{
+    ...(role != '2' ? [{
       title: 'Validar Visita',
       description: 'Verifica y confirma la visita.',
       icon: 'CheckCircleOutlined',
