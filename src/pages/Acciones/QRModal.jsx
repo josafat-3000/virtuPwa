@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Modal, Button, Typography, QRCode, Row, Col, Card } from 'antd';
+import logo from "../../assets/virtu.png";
 
 const { Title, Text } = Typography;
 
@@ -60,7 +61,6 @@ const QRModal = ({ visit, onClose, loading }) => {
 
   return (
     <Modal
-      title="Código QR de la Visita"
       open={!!visit?.id}
       centered
       onCancel={onClose}
@@ -73,6 +73,23 @@ const QRModal = ({ visit, onClose, loading }) => {
         </Button>
       ]}
     >
+
+
+      <Row justify="center" align="middle" >
+        <Col>
+          <img
+            src={logo}
+            alt="Logo"
+            style={{
+              width: '60%',
+              maxWidth: 300,
+              height: 'auto',
+              display: 'block',
+              margin: '0 auto'
+            }}
+          />
+        </Col>
+      </Row>
       <div ref={qrRef} style={{
         display: "flex",
         flexDirection: "column",
@@ -83,8 +100,8 @@ const QRModal = ({ visit, onClose, loading }) => {
         background: "white",
       }}>
         {/* 🔹 Diseño transpuesto (Etiqueta - Valor) */}
-        <Card style={{ width: '100%', padding:0 }}>
-        <Title level={4}>Información de la visita:</Title>
+        <Card style={{ width: '100%', padding: 0 }}>
+          <Title level={4}>Información de la visita:</Title>
           <Row gutter={[16, 8]}>
             {selectedFields.map(({ key, label }) => (
               visit[key] && (
@@ -101,12 +118,11 @@ const QRModal = ({ visit, onClose, loading }) => {
           </Row>
         </Card>
 
+        {visit?.id && <QRCode value={visit.id.toString()} size={350} />}
         <Title level={4} style={{ marginTop: 20 }}>Instrucciones:</Title>
-        <Text type="secondary" style={{ display: 'block', marginBottom: 20 }}>
+        <Text style={{fontSize:17, display: 'block', marginBottom: 20 }}>
           Presentar el código QR en Acceso Visita. Acceso con identificación oficial.
         </Text>
-
-        {visit?.id && <QRCode value={visit.id.toString()} size={200} />}
       </div>
     </Modal>
   );
