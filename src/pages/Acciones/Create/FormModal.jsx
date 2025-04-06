@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import TextField from '@mui/material/TextField';
 import dayjs from 'dayjs';
 
-const FormModal = ({ open, onOk, onCancel, hasVehicle, setHasVehicle }) => {
+const Generate = ({ open, onOk, onCancel, hasVehicle, setHasVehicle }) => {
   const [form] = Form.useForm();
   const [selectedDate, setSelectedDate] = useState(dayjs());
 
@@ -97,4 +97,4 @@ const FormModal = ({ open, onOk, onCancel, hasVehicle, setHasVehicle }) => {
   );
 };
 
-export default FormModal;
+export default Generate;

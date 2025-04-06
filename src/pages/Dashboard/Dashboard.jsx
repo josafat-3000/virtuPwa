@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import { KeyOutlined } from '@ant-design/icons';
 import { EyeOutlined, ClockCircleOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Card, Statistic, Row, Col, Typography } from 'antd';
-import QuickAccionsPage from '../Acciones/Acciones';
+import QuickAccionsPage from '../Acciones/QuickActions.jsx';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchVisitStats } from '../../store/visitSlice.js'
 import './Dashboard.css';

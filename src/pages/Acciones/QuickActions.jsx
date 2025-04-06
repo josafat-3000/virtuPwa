@@ -3,13 +3,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, message } from 'antd';
 import { startRecording, startScan, stopScan, updateVisitStatus } from '../../store/scanSlice';
 import { createVisit } from '../../store/createVisitSlice';
-import FormModal from './FormModal';
-import QRModal from './QRModal';
-import ScanModal from './ScanModal';
+import { fetchAllVisits } from '../../store/allVisitSlice';
+import FormModal from './Create/FormModal';
+import QRModal from './Create/QRModal';
+import ScanModal from './Validate/ScanModal';
 import ActionsCard from './ActionsCard';
+import SearchVisitForm from './SearchVisit';
 
 const ActionsPage = () => {
   const role = useSelector((state) => state.user.user.role);
+  const { visitas, loadingVisits } = useSelector((state) => state.allVisits);
   const [open, setOpen] = useState(false);
   const [openScan, setOpenScan] = useState(false);
   const [visit, setVisit] = useState(null);
@@ -18,7 +21,7 @@ const ActionsPage = () => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.createVisit);
   const { visitData } = useSelector((state) => state.scan);
-
+  const [openSearch, setOpenSearch] = useState(false);
   const showModal = () => setOpen(true);
 
   const handleCreateVisit = async (values) => {
@@ -33,7 +36,15 @@ const ActionsPage = () => {
       message.error(error.message || 'Error al crear visita');
     }
   };
-
+  const handleSelectVisit = (visit, action) => {
+    if(action == 'modify'){
+      setSelectedVisit(visit);
+      setOpenModify(true);
+    }
+    else {
+      setVisit(visit)
+    }
+  };
   useEffect(() => {
     setIsButtonDisabled(!visitData);
   }, [visitData]);
@@ -44,6 +55,15 @@ const ActionsPage = () => {
       description: 'Crea un nuevo registro de visita.',
       icon: 'PlusOutlined',
       action: showModal,
+    },
+    {
+      title: 'Regenerar QR',
+      description: 'Regenera el código de acceso a una vsisita',
+      icon: 'undoOutlined',
+      action: () => {
+        setOpenSearch(true);
+        dispatch(fetchAllVisits());
+      },
     },
     ...(role != '2' ? [{
       title: 'Validar Visita',
@@ -66,23 +86,30 @@ const ActionsPage = () => {
           </Col>
         ))}
       </Row>
-      
-      <FormModal 
+
+      <FormModal
         open={open}
         onOk={handleCreateVisit}
         onCancel={() => setOpen(false)}
         hasVehicle={hasVehicle}
         setHasVehicle={setHasVehicle}
       />
-      
+      <SearchVisitForm
+        open={openSearch}
+        onOk={handleSelectVisit}
+        onCancel={() => setOpenSearch(false)}
+        visits={visitas}
+        loading={loadingVisits}
+      />
+
       {visit && (
-        <QRModal 
-          visit={visit} 
+        <QRModal
+          visit={visit}
           onClose={() => setVisit(null)}
           loading={loading}
         />
       )}
-      
+
       <ScanModal
         open={openScan}
         onClose={() => {

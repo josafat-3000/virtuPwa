@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Button } from 'antd';
-import Validate from './Validate/ValidateModal';
+import Validate from './ValidateModal';
 
 const ScanModal = ({ open, onClose, onValidate, disabled, loading }) => (
   <Modal

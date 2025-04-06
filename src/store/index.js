@@ -9,6 +9,7 @@ import createVisitReducer from './createVisitSlice';
 import scanReducer from './scanSlice';
 import configReducer from './configSlice';
 import notificationsReducer from './notificationSlice';
+import visitByIdReducer from './singleVisitSlice';
 
 const persistConfig = {
   key: 'root',
@@ -27,6 +28,7 @@ const store = configureStore({
     scan: scanReducer,
     config: configReducer,
     notifications: notificationsReducer,
+    visitById: visitByIdReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

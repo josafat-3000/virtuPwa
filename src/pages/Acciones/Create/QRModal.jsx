@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Modal, Button, Typography, QRCode, Row, Col, Card } from 'antd';
-import logo from "../../assets/virtu.png";
+import logo from "../../../assets/virtu.png";
 
 const { Title, Text } = Typography;
 
