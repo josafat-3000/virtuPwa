@@ -10,7 +10,8 @@ import scanReducer from './scanSlice';
 import configReducer from './configSlice';
 import notificationsReducer from './notificationSlice';
 import visitByIdReducer from './singleVisitSlice';
-
+import linkReducer from './visitLinkSlice';
+import createFromLinkReducer from './createFromLinkSlice';
 const persistConfig = {
   key: 'root',
   storage: sesionStorage,
@@ -29,6 +30,8 @@ const store = configureStore({
     config: configReducer,
     notifications: notificationsReducer,
     visitById: visitByIdReducer,
+    link: linkReducer,
+    createFromLink: createFromLinkReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -11,6 +11,8 @@ import ScanModal from './Validate/ScanModal';
 import ActionsCard from './ActionsCard';
 import SearchVisitForm from './SearchVisit';
 import EditVisitForm from './Modify/ModifyModal';
+import LinkModal from './LinkModal';
+import { fetchVisitLink } from '../../store/visitLinkSlice';
 
 const ActionsPage = () => {
   const dispatch = useDispatch();
@@ -24,8 +26,11 @@ const ActionsPage = () => {
   const [hasVehicle, setHasVehicle] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedVisit, setSelectedVisit] = useState(null);
+  const [ openLinkModal, setOpenLinkModal] = useState(false);
   const { loading } = useSelector((state) => state.createVisit);
   const { visitData } = useSelector((state) => state.scan);
+  const { link } = useSelector((state) => state.link);
+
 
   // Cargar visitas al montar el componente
   useEffect(() => {
@@ -52,7 +57,7 @@ const ActionsPage = () => {
   };
 
   const handleSelectVisit = (visit, action) => {
-    if(action == 'modify'){
+    if (action == 'modify') {
       setSelectedVisit(visit);
       setOpenModify(true);
     }
@@ -63,22 +68,22 @@ const ActionsPage = () => {
 
   const handleEditVisit = async (data) => {
     try {
-      console.log(data,'vyvyvdata')
+      console.log(data, 'vyvyvdata')
       // Verificar si la visita ya está en progreso (check-in realizado)
       if (selectedVisit?.status === 'in_progress') {
         message.warning('No se puede editar una visita que ya ha realizado check-in');
         return;
       }
-  
+
       // Verificar si la visita ya está completada
       if (selectedVisit?.status === 'completed') {
         message.warning('No se puede editar una visita ya completada');
         return;
       }
-      
+
       // Despachar la acción para cargar los datos de la visita
-      const result = await dispatch(patchVisitById({id:selectedVisit?.id, values:data})).unwrap();
-      
+      const result = await dispatch(patchVisitById({ id: selectedVisit?.id, values: data })).unwrap();
+
       if (result) {
         message.success('Datos de visita cargados correctamente');
       }
@@ -123,6 +128,15 @@ const ActionsPage = () => {
         dispatch(startScan());
         dispatch(startRecording());
       },
+    },
+    {
+      title: 'Link de Visita',
+      description: 'Crea un formulario de registro.',
+      icon: 'PlusOutlined',
+      action: () => {
+        setOpenLinkModal(true),
+        dispatch(fetchVisitLink())
+      }
     }] : []),
   ];
 
@@ -151,6 +165,12 @@ const ActionsPage = () => {
         visits={visitas}
         loading={loadingVisits}
       />
+
+      <LinkModal 
+       open={openLinkModal}
+       onOk={()=>setOpenLinkModal(false)}
+       generatedUrl={`${import.meta.env.VITE_FRONTEND_URL}/visit/${link}`}
+       />
 
       <EditVisitForm
         open={openModify}
