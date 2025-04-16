@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-const url_visits = `${import.meta.env.VITE_BACKEND_URL}/api/v1/visits`;
+const url_visits = `${import.meta.env.VITE_BACKEND_URL}/api/v1/visits/updaye`;
 
 export const patchVisitById = createAsyncThunk('visits/fetchVisitById', async ({ id, values }) => {
-  console.log()
+  console.log("akjdaskndsad")
     const response = await axios.patch(`${url_visits}/${id}`,values,{ withCredentials: true }); // Asegúrate de que el endpoint sea correcto
     return response.data;
   });
