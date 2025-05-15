@@ -24,7 +24,7 @@ const AccessLinkModal = ({ open, onOk, loading = false, generatedUrl }) => {
       open={open}
       centered
       onOk={onOk}
-      onCancel={() => {}}
+      onCancel={onOk}
       okButtonProps={{ disabled: !url }}
       destroyOnClose
       footer={[

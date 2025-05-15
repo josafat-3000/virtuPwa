@@ -19,7 +19,7 @@ const HeaderComponent = () => {
                 padding: '0 30px',
                 position: 'sticky',
                 top: 0,
-                zIndex: 1,
+                zIndex: 999,
                 background: 'white',
                 borderRadius: '10px',
                 boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)',
@@ -33,6 +33,8 @@ const HeaderComponent = () => {
                 {/* Aquí colocamos el NotificationIcon que maneja las notificaciones */}
                 <NotificationIcon />
             </div>
+            
+                
         </Header>
     );
 };

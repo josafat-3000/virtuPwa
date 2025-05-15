@@ -12,6 +12,8 @@ import notificationsReducer from './notificationSlice';
 import visitByIdReducer from './singleVisitSlice';
 import linkReducer from './visitLinkSlice';
 import createFromLinkReducer from './createFromLinkSlice';
+import allUploadsReducer from './AllUploadsSlice';
+
 const persistConfig = {
   key: 'root',
   storage: sesionStorage,
@@ -31,7 +33,8 @@ const store = configureStore({
     notifications: notificationsReducer,
     visitById: visitByIdReducer,
     link: linkReducer,
-    createFromLink: createFromLinkReducer
+    createFromLink: createFromLinkReducer,
+    allUploads: allUploadsReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
