@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Spin, Image, Row, Col } from 'antd';
+import axios from 'axios';
 
 const ValidateDocumentsModal = ({ open, onClose, folderName, onValidate }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log(folderName)
     if (open && folderName) {
       setLoading(true);
-      fetch(`http://localhost:3000/api/v1/docs/${folderName}`)
-        .then(res => res.json())
-        .then(data => setImages(data))
+      axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/docs/${folderName}`)
+        .then(res => setImages(res.data))
         .catch(() => setImages([]))
         .finally(() => setLoading(false));
     }
