@@ -52,6 +52,7 @@ const SearchDocumentForm = ({ open, onOk, onCancel, uploads, loading = false }) 
             onChange={(value) => {
               // Encuentra la visita completa basada en el ID seleccionado
               const fullVisit = uploads.find(v => v.id === value);
+              console.log('Visita seleccionada:', fullVisit);
               setSelectedVisit(fullVisit);
             }}
             loading={loading}
