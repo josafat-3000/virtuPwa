@@ -23,7 +23,7 @@ const Dashboard = () => {
   // Condicional para mostrar las tarjetas solo si el rol no es "user"
   const displayRelevantInfo = role != '2';
   return (
-    <div style={{ margin: '16px' }}>
+    <div style={{ margin: '0px' }}>
       {user && (
         <Title level={3}>Bienvenido, {user}</Title>
       )}

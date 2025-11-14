@@ -1,0 +1,40 @@
+/* GenerateCard.css */
+
+.generate-card-container {
+    min-height: 100vh;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.generate-card {
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); /* Igual que el estilo de RegisterCard */
+    padding: 20px;
+    width: 100%;
+    max-width: 500px; /* Mismo ancho máximo */
+    margin: 0 auto;
+    background-color: #ffffff; /* Fondo blanco */
+}
+
+.generate-card-title {
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.generate-card-button {
+    width: 100%;
+    background-color: #00497E !important; /* Color del botón */
+    color: #ffffff; /* Color del texto del botón */
+    border: 1px solid transparent;
+    padding: 12px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.generate-card-button:hover {
+    background-color: #052f49 !important; /* Color del botón al pasar el mouse */
+}

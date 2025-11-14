@@ -11,6 +11,7 @@ import AccionsPage from './pages/Acciones/Acciones';
 import ProfilePage from './pages/Profile/Profile';
 import Configuracion from './pages/Configuracion/Configuracion';
 import Forgot from './pages/Auth/ForgotPassword/Forgot';
+import CreateFromLink from './pages/Acciones/Create/CreateFromLink'
 import { ConfirmAccountForm, ResetPasswordForm } from './pages/Auth/ResetPassword/ResetPassword'
 const App = () => {
   return (
@@ -43,6 +44,12 @@ const App = () => {
           <Route path="/confirm/:token" element={
             <ProtectedRoute redirectAuthenticatedTo="/">
               <ConfirmAccountForm />
+            </ProtectedRoute>
+          }
+          />
+          <Route path="/visit/:token" element={
+            <ProtectedRoute redirectAuthenticatedTo="/">
+              <CreateFromLink />
             </ProtectedRoute>
           }
           />

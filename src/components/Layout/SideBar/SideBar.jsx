@@ -8,6 +8,7 @@ import {
   SettingOutlined,
   LogoutOutlined,
   MenuOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
 import { useMediaQuery } from 'react-responsive';
 import { useNavigate } from 'react-router-dom';
@@ -100,16 +101,18 @@ const Sidebar = ({ collapsed, onCollapse }) => {
       {isSmallerThanMd && (
         <Button
           type="text"
-          icon={<MenuOutlined />}
+          icon={collapsed ? <MenuOutlined /> : <CloseOutlined />}
           onClick={() => onCollapse(!collapsed)}
           style={{
             position: 'fixed',
             top: 16,
             left: 16,
             zIndex: 10000,
+            fontSize: '20px',
           }}
         />
       )}
+
       <Sider
         ref={sidebarRef} // Añade el ref al Sider
         collapsible

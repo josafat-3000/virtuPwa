@@ -78,7 +78,7 @@ const ActionsPage = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div>
       <Row gutter={[16, 16]}>
         {actions.map((action, index) => (
           <Col xs={24} sm={12} md={12} lg={12} key={index}>

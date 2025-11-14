@@ -309,7 +309,7 @@ function Registros() {
     ];
 
     return (
-        <div style={{ margin: "16px" }}>
+        <div>
             <Button
                 type="primary"
                 onClick={exportToExcel}
