@@ -19,18 +19,18 @@ const NotificationIcon = () => {
     dispatch(fetchNotifications());
 
     // Configurar el cliente SSE con reintentos
-    let eventSource = new EventSource(sseUrl, { withCredentials: true });
+    // let eventSource = new EventSource(sseUrl, { withCredentials: true });
 
     // Manejar la conexión SSE
     const handleSSE = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(data);
-      dispatch(addNotification({ message: data.message, created_at: data.created_at }));
+      // const data = JSON.parse(event.data);
+      // console.log(data);
+      // dispatch(addNotification({ message: data.message, created_at: data.created_at }));
 
-      // Incrementar el contador si el dropdown no está visible
-      if (!isDropdownVisible) {
-        setUnreadCount((prev) => prev + 1);
-      }
+      // // Incrementar el contador si el dropdown no está visible
+      // if (!isDropdownVisible) {
+      //   setUnreadCount((prev) => prev + 1);
+      // }
     };
 
     eventSource.onmessage = handleSSE;
