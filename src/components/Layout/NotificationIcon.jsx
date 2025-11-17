@@ -10,13 +10,13 @@ const sseUrl = `${backendUrl}/api/v1/notifications/stream`;
 const NotificationIcon = () => {
   console.log(sseUrl)
   const dispatch = useDispatch();
-  const notifications = useSelector((state) => state.notifications.notifications);
+  // const notifications = useSelector((state) => state.notifications.notifications);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   useEffect(() => {
     // Obtener las notificaciones iniciales al cargar el componente
-    dispatch(fetchNotifications());
+    // dispatch(fetchNotifications());
 
     // Configurar el cliente SSE con reintentos
     // let eventSource = new EventSource(sseUrl, { withCredentials: true });
@@ -62,18 +62,19 @@ const NotificationIcon = () => {
   const menu = (
     <List
       size="small"
-      dataSource={notifications.slice().reverse()}
+      
+      //dataSource={notifications.slice().reverse()}
       renderItem={(item, index) => (
         <div key={index}>
-          <List.Item style={{ padding: '8px 16px' }}>
+          {/* <List.Item style={{ padding: '8px 16px' }}>
             <List.Item.Meta
               title={<Typography.Text strong>Notificación de {item.notification_type}</Typography.Text>}
               description={
                 <Typography.Text>La Visita: {item.visit_id} ha hecho {item.notification_type}</Typography.Text>
               }
             />
-          </List.Item>
-          {index !== notifications.length - 1 && <Divider />}
+          </List.Item> */}
+          {/* {index !== notifications.length - 1 && <Divider />} */}
         </div>
       )}
       style={{ maxHeight: '300px', overflowY: 'auto', width: '300px' }}
