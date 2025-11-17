@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Badge, Dropdown, List, Typography, Divider } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchNotifications, addNotification } from '../../store/notificationSlice.js';
+// import { fetchNotifications, addNotification } from '../../store/notificationSlice.js';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const sseUrl = `${backendUrl}/api/v1/notifications/stream`;

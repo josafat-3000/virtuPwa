@@ -25,7 +25,9 @@ const SearchDocumentForm = ({ open, onOk, onCancel, uploads, loading = false }) 
 
   // Función para formatear el texto de visualización
   const formatVisitText = (upload) => {
-    return `${upload.visit.visitor_name} - ${upload.visit.visit_reason}`;
+    const visitorName = upload?.visit?.visitor_name || "Nombre no disponible";
+    const visitReason = upload?.visit?.visit_reason || "Motivo no disponible";
+    return `${visitorName} 	-	 ${visitReason}`;
   };
 
   return (
