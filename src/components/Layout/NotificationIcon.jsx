@@ -33,21 +33,21 @@ const NotificationIcon = () => {
       // }
     };
 
-    eventSource.onmessage = handleSSE;
+    // eventSource.onmessage = handleSSE;
 
-    eventSource.onerror = () => {
-      console.error('Error connecting to SSE');
-      eventSource.close();
-      setTimeout(() => {
-        // Reintentar la conexión después de un tiempo
-        eventSource = new EventSource(sseUrl);
-      }, 5000); // Intentar reconectar después de 5 segundos
-    };
+    // eventSource.onerror = () => {
+    //   console.error('Error connecting to SSE');
+    //   eventSource.close();
+    //   setTimeout(() => {
+    //     // Reintentar la conexión después de un tiempo
+    //     eventSource = new EventSource(sseUrl);
+    //   }, 5000); // Intentar reconectar después de 5 segundos
+    // };
 
     // Limpiar el EventSource al desmontar el componente
-    return () => {
-      eventSource.close();
-    };
+    // return () => {
+    //   eventSource.close();
+    // };
   }, [dispatch, isDropdownVisible]);
 
   // Función para manejar cuando el dropdown se abre o cierra
