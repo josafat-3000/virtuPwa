@@ -65,7 +65,7 @@ const SearchDocumentForm = ({ open, onOk, onCancel, uploads, loading = false }) 
             {uploads?.map((upload) => (
               <Option 
                 key={upload.id} 
-                value={upload.id} // ← Solo pasamos el ID como valor
+                value={upload.visit.visitor_name} // ← Solo pasamos el ID como valor
               >
                 {formatVisitText(upload)}
               </Option>
