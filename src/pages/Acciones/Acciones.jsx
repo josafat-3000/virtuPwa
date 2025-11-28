@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, message } from 'antd';
 import { startRecording, startScan, stopScan, updateVisitStatus } from '../../store/scanSlice';
 import { fetchAllVisits } from '../../store/allVisitSlice';
-import { fetchAllUploads } from '../../store/AllUploadsSlice'
+import { fetchAllUploads } from '../../store/AllUploadsSlice';
 import { patchVisitById } from '../../store/singleVisitSlice';
 import { createVisit } from '../../store/createVisitSlice';
 import FormModal from './Create/FormModal';
@@ -21,7 +21,8 @@ const ActionsPage = () => {
   const dispatch = useDispatch();
   const role = useSelector((state) => state.user.user.role);
   const { visitas, loadingVisits } = useSelector((state) => state.allVisits);
-  const { uploads, loadingUploads } = useSelector((state)=> state.allUploads)
+  const { uploads, loadingUploads } = useSelector((state) => state.allUploads);
+  const filteredUploads = uploads.filter((upload) => upload.visit !== undefined && upload.visit !== null);
   const [open, setOpen] = useState(false);
   const [openScan, setOpenScan] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
@@ -37,6 +38,7 @@ const ActionsPage = () => {
   const { loading } = useSelector((state) => state.createVisit);
   const { visitData } = useSelector((state) => state.scan);
   const { link } = useSelector((state) => state.link);
+  const [currentActionFlag, setCurrentActionFlag] = useState(null);
 
 
   // Cargar visitas al montar el componente
@@ -64,12 +66,11 @@ const ActionsPage = () => {
   };
 
   const handleSelectVisit = (visit, action) => {
-    if (action == 'modify') {
+    if (action === 'modify') {
       setSelectedVisit(visit);
       setOpenModify(true);
-    }
-    else {
-      setVisit(visit)
+    } else if (action === 'regenerateQR') {
+      setVisit(visit);
     }
   };
 
@@ -129,17 +130,21 @@ const ActionsPage = () => {
       description: 'Regenera el código de acceso a una visita',
       icon: 'undoOutlined',
       action: () => {
+        setCurrentActionFlag('regenerateQR'); // Set the flag
         setOpenSearch(true);
         dispatch(fetchAllVisits());
       },
+      flag: 'regenerateQR',
     },
     {
       title: 'Editar detalles de una visita',
       description: 'Modifica los detalles de un registro',
       icon: 'EditOutlined',
       action: () => {
+        setCurrentActionFlag('modify'); // Set the flag
         setOpenSearch(true);
       },
+      flag: 'modify',
     },
     ...(role != '2' ? [{
       title: 'Validar Visita',
@@ -192,7 +197,10 @@ const ActionsPage = () => {
 
       <SearchVisitForm
         open={openSearch}
-        onOk={handleSelectVisit}
+        onOk={(visit) => {
+          console.log(currentActionFlag); // Debugging
+          handleSelectVisit(visit, currentActionFlag); // Use the dynamic flag
+        }}
         onCancel={() => setOpenSearch(false)}
         visits={visitas}
         loading={loadingVisits}
@@ -202,7 +210,7 @@ const ActionsPage = () => {
         open={openSearchDoc}
         onOk={handleSelectUpload}
         onCancel={() => setOpenSearchDoc(false)}
-        uploads={uploads}
+        uploads={filteredUploads}
         loading={loadingUploads}
       />
 
