@@ -16,13 +16,14 @@ import EditVisitForm from './Modify/ModifyModal';
 import LinkModal from './LinkModal';
 import DocumentValidationModal from './DocValidate/DocValidate';
 import { fetchVisitLink } from '../../store/visitLinkSlice';
+import axios from 'axios';
 
 const ActionsPage = () => {
   const dispatch = useDispatch();
   const role = useSelector((state) => state.user.user.role);
   const { visitas, loadingVisits } = useSelector((state) => state.allVisits);
   const { uploads, loadingUploads } = useSelector((state) => state.allUploads);
-  const filteredUploads = uploads.filter((upload) => upload.visit !== undefined && upload.visit !== null);
+  const filteredUploads = uploads.filter((upload) => upload.visit !== undefined && upload.visit !== null && !upload.visit.validated);
   const [open, setOpen] = useState(false);
   const [openScan, setOpenScan] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
@@ -75,15 +76,13 @@ const ActionsPage = () => {
   };
 
   const handleSelectUpload = (upload) => {
-    setUpload(upload.id)
+    setUpload(upload)
     setOpenSearchDoc(false)
     setOpenDocValidate(true)
   };
 
   const handleEditVisit = async (data) => {
     try {
-      console.log(data, 'vyvyvdata')
-      // Verificar si la visita ya está en progreso (check-in realizado)
       if (selectedVisit?.status === 'in_progress') {
         message.warning('No se puede editar una visita que ya ha realizado check-in');
         return;
@@ -110,12 +109,15 @@ const ActionsPage = () => {
     }
   };
 
-  const handleValidate = () => {
-    console.log(upload)
-    // Aquí manejas tu lógica de validación y llamada a la API
-    console.log('Validando documento...');
-    // Luego puedes cerrar el modal
-    setOpenDocValidate(false);
+  const handleValidate = async () => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/docs/validate/${upload.id}`);
+      setVisit(upload.visit);
+      setOpenDocValidate(false);
+    } catch (error) {
+      console.error('Validation failed:', error);
+      message.error('Validation failed. Please try again.');
+    }
   };
 
   const actions = [
@@ -231,7 +233,7 @@ const ActionsPage = () => {
         open={openDocValidate}
         onClose={() => setOpenDocValidate(false)}
         onValidate={handleValidate}
-        folderName={upload}
+        folderName={upload?.id}
       />
 
       {visit && (
