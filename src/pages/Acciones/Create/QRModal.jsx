@@ -118,7 +118,7 @@ const QRModal = ({ visit, onClose, loading }) => {
           </Row>
         </Card>
 
-        {visit?.id && <QRCode value={visit.id.toString()} size={350} />}
+        {visit?.id && <QRCode value={visit.id.toString()} size={250} />}
         <Title level={4} style={{ marginTop: 20 }}>Instrucciones:</Title>
         <Text style={{fontSize:17, display: 'block', marginBottom: 20 }}>
           Presentar el código QR en Acceso Visita. Acceso con identificación oficial.

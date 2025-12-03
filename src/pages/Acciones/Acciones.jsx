@@ -233,6 +233,7 @@ const ActionsPage = () => {
         open={openDocValidate}
         onClose={() => setOpenDocValidate(false)}
         onValidate={handleValidate}
+        visitInfo={upload?.visit}
         folderName={upload?.id}
       />
 

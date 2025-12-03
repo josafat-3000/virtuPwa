@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Spin, Image, Row, Col } from 'antd';
+import { Modal, Button, Spin, Image, Row, Col, Typography } from 'antd';
 import axios from 'axios';
 
-const ValidateDocumentsModal = ({ open, onClose, folderName, onValidate }) => {
+const { Title, Text } = Typography;
+
+const ValidateDocumentsModal = ({ open, onClose, folderName, onValidate, visitInfo }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,6 +33,34 @@ const ValidateDocumentsModal = ({ open, onClose, folderName, onValidate }) => {
       ]}
       width={800}
     >
+      {visitInfo && (
+        <div style={{ marginBottom: '16px', padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+          <Title level={4} style={{ marginBottom: '16px' }}>Información de la Visita</Title>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '8px', fontWeight: 'bold', borderBottom: '1px solid #ddd' }}>Nombre:</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{visitInfo.visitor_name}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', fontWeight: 'bold', borderBottom: '1px solid #ddd' }}>Razón:</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{visitInfo.visit_reason}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', fontWeight: 'bold', borderBottom: '1px solid #ddd' }}>Fecha:</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{new Date(visitInfo.visit_date).toLocaleString('es-ES', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+})}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {loading ? (
         <Spin />
       ) : (
