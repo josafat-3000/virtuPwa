@@ -29,7 +29,7 @@ const SearchVisitForm = ({ open, onOk, onCancel, visits, loading = false }) => {
       visit.visit_reason || 'Sin motivo'
     } (${
       visit.visit_date 
-        ? new Date(visit.visit_date).toLocaleDateString() 
+        ? new Date(visit.visit_date).toLocaleDateString('en-US', { timeZone: 'America/Mexico_City' })
         : 'Sin fecha'
     })`;
   };

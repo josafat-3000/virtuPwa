@@ -56,6 +56,8 @@ const QRModal = ({ visit, onClose, loading }) => {
   // 🔹 Campos específicos a mostrar en formato transpuesto
   const selectedFields = [
     { key: 'visitor_name', label: 'Nombre' },
+    { key: 'visit_reason', label: 'Motivo' },
+    { key: 'visitor_company', label: 'Empresa' },
     { key: 'visit_date', label: 'Fecha' },
   ];
 
@@ -73,8 +75,6 @@ const QRModal = ({ visit, onClose, loading }) => {
         </Button>
       ]}
     >
-
-
       <Row justify="center" align="middle" >
         <Col>
           <img
@@ -95,22 +95,24 @@ const QRModal = ({ visit, onClose, loading }) => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        textAlign: "center",
         padding: 20,
         background: "white",
+        textAlign: "center"
       }}>
         {/* 🔹 Diseño transpuesto (Etiqueta - Valor) */}
         <Card style={{ width: '100%', padding: 0 }}>
-          <Title level={4}>Información de la visita:</Title>
+          <Title style={{ textAlign: "center" }} level={4}>Información de la visita:</Title>
           <Row gutter={[16, 8]}>
             {selectedFields.map(({ key, label }) => (
-              visit[key] && (
+              key !== 'visit_date' && visit[key] && (
                 <React.Fragment key={key}>
                   <Col xs={10} sm={8} md={6}>
                     <Text strong>{label}:</Text>
                   </Col>
                   <Col xs={14} sm={16} md={18}>
-                    <Text>{visit[key]}</Text>
+                    <Text>
+                      {visit[key]}
+                    </Text>
                   </Col>
                 </React.Fragment>
               )
@@ -119,8 +121,12 @@ const QRModal = ({ visit, onClose, loading }) => {
         </Card>
 
         {visit?.id && <QRCode value={visit.id.toString()} size={250} />}
+        <Title level={4} style={{ marginTop: 20 }}>Fecha de la visita:</Title>
+        <Text style={{ fontWeight: 'bold', fontSize: 17, display: 'block', marginBottom: 20 }}>
+          {visit.visit_date && new Date(visit.visit_date).toLocaleString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </Text>
         <Title level={4} style={{ marginTop: 20 }}>Instrucciones:</Title>
-        <Text style={{fontSize:17, display: 'block', marginBottom: 20 }}>
+        <Text style={{ fontSize: 17, display: 'block', marginBottom: 20 }}>
           Presentar el código QR en Acceso Visita. Acceso con identificación oficial.
         </Text>
       </div>
