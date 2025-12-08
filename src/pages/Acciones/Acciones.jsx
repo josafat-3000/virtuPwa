@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Row, Col, message } from 'antd';
+import { Row, Col, message, notification } from 'antd';
 import { startRecording, startScan, stopScan, updateVisitStatus } from '../../store/scanSlice';
 import { fetchAllVisits } from '../../store/allVisitSlice';
 import { fetchAllUploads } from '../../store/AllUploadsSlice';
@@ -251,10 +251,51 @@ const ActionsPage = () => {
           setOpenScan(false);
           dispatch(stopScan());
         }}
-        onValidate={() => {
-          if (visitData?.id) dispatch(updateVisitStatus({ id: visitData.id }));
-          dispatch(stopScan());
-          setOpenScan(false);
+        onValidate={async () => {
+          console.log('onValidate triggered, visitData:', visitData);
+          if (!visitData?.id) {
+            message.warning('Por favor escanea un código QR válido primero.');
+            return;
+          }
+
+          // Dispatch and inspect the returned action to reliably handle both fulfilled and rejected
+          dispatch(updateVisitStatus({ id: visitData.id }))
+            .then((action) => {
+              console.log('updateVisitStatus action:', action);
+              // action may be {type: 'scan/updateVisitStatus/fulfilled', payload: ...}
+              if (action && action.type && action.type.endsWith('/fulfilled')) {
+                const res = action.payload;
+                const msg = (res && (res.message || res.detail)) || 'Visita validada correctamente';
+                notification.success({ message: 'Visita validada', description: msg, duration: 6 });
+                dispatch(stopScan());
+                setOpenScan(false);
+              } else if (action) {
+                // Rejected action
+                const payload = action.payload || action.error || 'Error desconocido';
+                const extractErrorMessage = (e) => {
+                  if (!e) return 'Error desconocido';
+                  if (typeof e === 'string') return e;
+                  if (e.message) return e.message;
+                  if (e.detail) return e.detail;
+                  if (e.error) return (typeof e.error === 'string' ? e.error : e.error.message || JSON.stringify(e.error));
+                  if (e.errors) return Array.isArray(e.errors) ? e.errors.map(x => x.message || x).join('; ') : JSON.stringify(e.errors);
+                  try { return JSON.stringify(e); } catch(ex) { return String(e); }
+                };
+                const msg = extractErrorMessage(payload);
+                console.error('Validation rejected payload:', payload);
+                notification.error({ message: 'Error al validar visita', description: msg, duration: 0 });
+              } else {
+                // No action object returned — unexpected
+                console.error('updateVisitStatus returned no action');
+                notification.error({ message: 'Error al validar visita', description: 'Respuesta inesperada del servidor', duration: 0 });
+              }
+            })
+            .catch((dispatchError) => {
+              // Shouldn't normally reach here, but handle unexpected errors
+              console.error('Dispatch failed:', dispatchError);
+              const msg = (dispatchError && (dispatchError.message || String(dispatchError))) || 'Error desconocido';
+              notification.error({ message: 'Error al validar visita', description: msg, duration: 0 });
+            });
         }}
         disabled={isButtonDisabled}
         loading={loading}

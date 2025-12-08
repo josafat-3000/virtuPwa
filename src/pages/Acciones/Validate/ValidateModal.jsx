@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Row, Col, Spin, Alert, Tag} from 'antd';
+import { Card, Row, Col, Spin, Tag } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { BrowserMultiFormatReader } from '@zxing/library';
 import { setScanResult, checkVisit, cleanScan, stopRecording, startRecording } from '../../../store/scanSlice';
@@ -19,7 +19,8 @@ function Validate() {
   const visitData = useSelector((state) => state.scan.visitData);
 
   const [codeReader, setCodeReader] = useState(null);
-  const [alertInfo, setAlertInfo] = useState({ message: '', type: '', visible: false });
+  // Errors from checkVisit are stored in the slice; this component will not render inline alerts.
+
   useEffect(() => {
     if (isRecording && isScanning) {
       if (!codeReader) {
@@ -38,18 +39,13 @@ function Validate() {
 
   useEffect(() => {
     if (scanResult) {
-      dispatch(checkVisit(scanResult)).then(({ payload }) => {
+      // Dispatch checkVisit to load visitData into the slice.
+      // Errors are saved in the slice (state.scan.error) and will be handled where validate is confirmed.
+      dispatch(checkVisit(scanResult)).finally(() => {
         dispatch(stopRecording());
-        if (payload.status==='completed') {
-          setAlertInfo({
-          message: 'Error al validar información, visita completada previamente.',
-          type: 'error',
-          visible: true,
-        });
-        }
       });
     }
-  }, [scanResult]);
+  }, [scanResult, dispatch]);
 
   useEffect(() => {
     if (!isScanning) {
@@ -57,6 +53,8 @@ function Validate() {
       handleStopScan();
     }
   }, [isScanning]);
+
+  // We keep error in slice; no inline alert rendering in this component.
 
   const handleScan = () => {
     if (codeReader) {
@@ -92,7 +90,6 @@ function Validate() {
         return 'gray'; // Gris para el caso por defecto
     }
   };
-const closeAlert = () => setAlertInfo({ ...alertInfo, visible: false });
 return (
     <>
       {isScanning && isRecording && (
@@ -115,9 +112,7 @@ return (
         </div>
       )}
 
-      {error && (
-        <Alert message="Error" description={error?.message || 'Error desconocido'} type="error" showIcon />
-      )}
+      {/* scan errors are not shown inline; notifications are shown on validate button action */}
 
       {visitData && (
         <div style={{ marginTop: "20px", maxWidth: '100%', overflowX: 'auto' }}>
@@ -173,15 +168,7 @@ return (
         </div>
         
       )}
-      {alertInfo.visible && (
-        <Alert
-          message={alertInfo.message}
-          type={alertInfo.type}
-          closable
-          onClose={closeAlert}
-          style={{ marginBottom: '16px' }}
-        />
-      )}
+      {/* Notifications handled by `message` API; no inline Alert rendering */}
     </>
   );
 }

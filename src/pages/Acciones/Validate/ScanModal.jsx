@@ -6,6 +6,7 @@ const ScanModal = ({ open, onClose, onValidate, disabled, loading }) => (
   <Modal
     title="Escanear código QR"
     open={open}
+    destroyOnClose
     centered
     onCancel={onClose}
     footer={[
